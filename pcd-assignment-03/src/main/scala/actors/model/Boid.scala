@@ -1,6 +1,6 @@
-package actors
+package actors.model
 
-final case class Boid(pos: P2d, vel: V2d):
+final case class Boid(id: Int, pos: P2d, vel: V2d):
 
   def updateVelocity(model: BoidsModel): Boid =
     val nearby = getNearbyBoids(model)

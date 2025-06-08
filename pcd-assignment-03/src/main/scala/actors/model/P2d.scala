@@ -1,4 +1,4 @@
-package actors
+package actors.model
 
 final case class P2d(x: Double, y: Double):
   def sum(v: V2d): P2d = P2d(x + v.x, y + v.y)
