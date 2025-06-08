@@ -10,5 +10,5 @@ import akka.actor.typed.ActorSystem
     Separation_weight, Alignment_weight, Cohesion_weight,
     Environment_width, Environment_height,
     Max_speed, Perception_radius, Avoid_radius)
-  val boidsModel = model.createBoids(1000)
+  val boidsModel = model.createBoids(10)
   val system = ActorSystem(ManagerActor(boidsModel), "BoidsSimulation")

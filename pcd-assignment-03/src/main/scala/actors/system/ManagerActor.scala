@@ -18,6 +18,7 @@ object ManagerActor:
     Behaviors.receive: (context, msg) =>
       msg match
         case StartCycle =>
+          context.log.info("Start vel calc")
           model.boids.foreach(b => boids(b.id) ! CalculateVelocity(model, context.messageAdapter(VelocityDone)))
           awaitingVelocities(model, model.boids.size, Map(), boids)
 
@@ -34,6 +35,8 @@ object ManagerActor:
           val newRemaining = remaining - 1
           val newMap = updatedBoids + (id -> boid)
           if (newRemaining == 0) {
+            context.log.info("All boids calculated vel")
+            context.log.info("Start pos calc")
             model.boids.foreach(b => boidActors(b.id) ! CalculatePosition(model, context.messageAdapter(PositionDone)))
             awaitingPositions(model, model.boids.size, Map(), boidActors)
           } else
@@ -53,10 +56,11 @@ object ManagerActor:
           val newRemaining = remaining - 1
           val newMap = updatedBoids + (id -> boid)
           if (newRemaining == 0) {
+            context.log.info("All boids calculated pos")
             //TODO: call the GUI here
             context.self ! StartCycle
             cycle(model, boidActors)
           } else
-            awaitingPositions(model, remaining, updatedBoids, boidActors)
+            awaitingPositions(model, newRemaining, updatedBoids, boidActors)
 
         case _ => Behaviors.unhandled
