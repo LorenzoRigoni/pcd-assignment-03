@@ -4,36 +4,50 @@ import akka.actor.typed.ActorRef;
 import ass03.model.Boid;
 import ass03.model.BoidsModel;
 
+import java.util.List;
+
 public abstract class Commands {
     private Commands() {}
 
     public static final class CalculateVelocity extends Commands {
         public final BoidsModel model;
+        public final List<Boid> boids;
         public final ActorRef<VelocityComputed> replyTo;
 
-        public CalculateVelocity(BoidsModel model, ActorRef<VelocityComputed> replyTo) {
+        public CalculateVelocity(BoidsModel model, List<Boid> boids, ActorRef<VelocityComputed> replyTo) {
             this.model = model;
+            this.boids = boids;
             this.replyTo = replyTo;
         }
     }
 
     public static final class CalculatePosition extends Commands {
         public final BoidsModel model;
+        public final List<Boid> boids;
         public final ActorRef<PositionComputed> replyTo;
 
-        public CalculatePosition(BoidsModel model, ActorRef<PositionComputed> replyTo) {
+        public CalculatePosition(BoidsModel model, List<Boid> boids, ActorRef<PositionComputed> replyTo) {
             this.model = model;
+            this.boids = boids;
             this.replyTo = replyTo;
         }
     }
 
-    public static final class VelocityComputed extends Commands {}
+    public static final class VelocityComputed extends Commands {
+        public final List<Boid> boids;
 
-    public static final class PositionComputed extends Commands {}
+        public VelocityComputed(List<Boid> boids) {
+            this.boids = boids;
+        }
+    }
+
+    public static final class PositionComputed extends Commands {
+        public final List<Boid> boids;
+
+        public PositionComputed(List<Boid> boids) {
+            this.boids = boids;
+        }
+    }
 
     public static final class StartCycle extends Commands {}
-
-    public static final class VelocityDone extends Commands {}
-
-    public static final class PositionDone extends Commands {}
 }
