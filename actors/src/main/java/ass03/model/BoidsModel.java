@@ -5,7 +5,7 @@ import java.util.List;
 
 public class BoidsModel {
     
-    private final List<Boid> boids;
+    private List<Boid> boids;
     private double separationWeight; 
     private double alignmentWeight; 
     private double cohesionWeight; 
@@ -45,6 +45,10 @@ public class BoidsModel {
     
     public List<Boid> getBoids(){
     	return boids;
+    }
+
+    public void setBoids(List<Boid> boids) {
+        this.boids = boids;
     }
     
     public double getMinX() {

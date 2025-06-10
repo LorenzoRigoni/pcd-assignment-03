@@ -12,9 +12,9 @@ public abstract class Commands {
     public static final class CalculateVelocity extends Commands {
         public final BoidsModel model;
         public final List<Boid> boids;
-        public final ActorRef<VelocityComputed> replyTo;
+        public final ActorRef<Commands> replyTo;
 
-        public CalculateVelocity(BoidsModel model, List<Boid> boids, ActorRef<VelocityComputed> replyTo) {
+        public CalculateVelocity(BoidsModel model, List<Boid> boids, ActorRef<Commands> replyTo) {
             this.model = model;
             this.boids = boids;
             this.replyTo = replyTo;
@@ -24,9 +24,9 @@ public abstract class Commands {
     public static final class CalculatePosition extends Commands {
         public final BoidsModel model;
         public final List<Boid> boids;
-        public final ActorRef<PositionComputed> replyTo;
+        public final ActorRef<Commands> replyTo;
 
-        public CalculatePosition(BoidsModel model, List<Boid> boids, ActorRef<PositionComputed> replyTo) {
+        public CalculatePosition(BoidsModel model, List<Boid> boids, ActorRef<Commands> replyTo) {
             this.model = model;
             this.boids = boids;
             this.replyTo = replyTo;
@@ -49,5 +49,13 @@ public abstract class Commands {
         }
     }
 
-    public static final class StartCycle extends Commands {}
+    public static final class StartSimulation extends Commands {
+        public final int numOfBoids;
+        public final BoidsModel model;
+
+        public StartSimulation(int numOfBoids, BoidsModel model) {
+            this.numOfBoids = numOfBoids;
+            this.model = model;
+        }
+    }
 }
