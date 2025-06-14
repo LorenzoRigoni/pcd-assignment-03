@@ -69,6 +69,16 @@ public abstract class Commands {
 
     public static final class GuiReady extends Commands {}
 
+    public static final class SetSimulationParams extends Commands {
+        public SimulationParams param;
+        public double newValue;
+
+        public SetSimulationParams(SimulationParams param, double newValue) {
+            this.param = param;
+            this.newValue = newValue;
+        }
+    }
+
     public static final class StartSimulation extends Commands {
         public final int numOfBoids;
 
@@ -76,4 +86,8 @@ public abstract class Commands {
             this.numOfBoids = numOfBoids;
         }
     }
+
+    public static final class SuspendSimulation extends Commands {}
+
+    public static final class ResumeSimulation extends Commands {}
 }

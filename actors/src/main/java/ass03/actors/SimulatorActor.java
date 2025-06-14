@@ -20,6 +20,7 @@ public class SimulatorActor extends AbstractBehavior<Commands> {
     private int positionReplies = 0;
     private int numOfBoids;
     private BoidsModel model;
+    private boolean isSuspended;
 
     public SimulatorActor(ActorContext<Commands> context, ActorRef<Commands> guiActor) {
         super(context);
@@ -27,6 +28,7 @@ public class SimulatorActor extends AbstractBehavior<Commands> {
         this.boidActors = new ArrayList<>();
         this.collectedBoids = new ArrayList<>();
         this.boidsLists = new ArrayList<>();
+        this.isSuspended = false;
     }
 
     public static Behavior<Commands> create(ActorRef<Commands> guiActor) {
@@ -41,6 +43,9 @@ public class SimulatorActor extends AbstractBehavior<Commands> {
                 .onMessage(Commands.VelocityComputed.class, this::onVelocityComputed)
                 .onMessage(Commands.PositionComputed.class, this::onPositionComputed)
                 .onMessage(Commands.GuiReady.class, this::onGuiReady)
+                .onMessage(Commands.SetSimulationParams.class, this::onSetSimulationParams)
+                .onMessage(Commands.SuspendSimulation.class, this::onSuspendSimulation)
+                .onMessage(Commands.ResumeSimulation.class, this::onResumeSimulation)
                 .build();
     }
 
@@ -65,9 +70,15 @@ public class SimulatorActor extends AbstractBehavior<Commands> {
     }
 
     private Behavior<Commands> onGuiReady(Commands.GuiReady command) {
+        if (!this.isSuspended) {
+            this.restartCycle();
+        }
+        return Behaviors.same();
+    }
+
+    private void restartCycle() {
         this.initialTime = System.currentTimeMillis();
         this.sendVelocityCommands();
-        return Behaviors.same();
     }
 
     private void sendVelocityCommands() {
@@ -106,6 +117,34 @@ public class SimulatorActor extends AbstractBehavior<Commands> {
             //System.out.println(this.guiActor);
             this.guiActor.tell(new Commands.PaintBoids(this.collectedBoids, this.initialTime));
         }
+        return Behaviors.same();
+    }
+
+    private Behavior<Commands> onSetSimulationParams(Commands.SetSimulationParams command) {
+        switch (command.param) {
+            case ALIGNMENT:
+                this.model.setAlignmentWeight(command.newValue);
+                break;
+
+            case COHESION:
+                this.model.setCohesionWeight(command.newValue);
+                break;
+
+            case SEPARATION:
+                this.model.setSeparationWeight(command.newValue);
+                break;
+        }
+        return Behaviors.same();
+    }
+
+    private Behavior<Commands> onSuspendSimulation(Commands.SuspendSimulation command) {
+        this.isSuspended = true;
+        return Behaviors.same();
+    }
+
+    private Behavior<Commands> onResumeSimulation(Commands.ResumeSimulation command) {
+        this.isSuspended = false;
+        this.restartCycle();
         return Behaviors.same();
     }
 

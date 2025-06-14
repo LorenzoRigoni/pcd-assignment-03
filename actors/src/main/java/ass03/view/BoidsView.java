@@ -1,7 +1,7 @@
 package ass03.view;
 
 import ass03.actors.Commands;
-import ass03.actors.GuiActor;
+import ass03.actors.SimulationParams;
 import ass03.model.Boid;
 
 import javax.swing.*;
@@ -19,11 +19,15 @@ public class BoidsView implements ChangeListener {
 	private final JButton suspendResumeButton;
 	private final GuiAdapter guiAdapter;
 	private final int width, height;
+	private boolean isStopped;
+	private boolean isSuspended;
 	
 	public BoidsView(int width, int height, GuiAdapter guiAdapter) {
 		this.width = width;
 		this.height = height;
 		this.guiAdapter = guiAdapter;
+		this.isStopped = true;
+		this.isSuspended = false;
 		
 		frame = new JFrame("Boids Simulation");
         frame.setSize(width, height);
@@ -41,7 +45,15 @@ public class BoidsView implements ChangeListener {
 		this.suspendResumeButton = new JButton("Suspend");
 		suspendResumeButton.setEnabled(false);
 		suspendResumeButton.addActionListener(e -> {
-			//TODO: suspend sim
+			if (this.isSuspended) {
+				this.isSuspended = false;
+				this.suspendResumeButton.setText("Suspend");
+				this.guiAdapter.getGuiActor().tell(new Commands.ResumeSimulation());
+			} else {
+				this.isSuspended = true;
+				this.suspendResumeButton.setText("Resume");
+				this.guiAdapter.getGuiActor().tell(new Commands.SuspendSimulation());
+			}
 		});
 
         JPanel slidersPanel = new JPanel();
@@ -77,6 +89,7 @@ public class BoidsView implements ChangeListener {
 		startStopButton.addActionListener(e -> {
 			if(this.isInputPositiveInteger(numOfBoidsField.getText())) {
 				this.suspendResumeButton.setEnabled(true);
+				this.isStopped = false;
 				int numOfBoids = Integer.parseInt(numOfBoidsField.getText());
 				cp.remove(this.boidsPanel);
 				this.boidsPanel = new BoidsPanel(this);
@@ -88,7 +101,7 @@ public class BoidsView implements ChangeListener {
 				JOptionPane.showMessageDialog(frame, "The input entered is not a positive integer");
 			}
 
-			/*if (this.simulator.isStopped()) {
+			if (this.isStopped) {
 				startStopButton.setText("Start");
 				numOfBoidsLabel.setVisible(true);
 				numOfBoidsField.setVisible(true);
@@ -96,7 +109,7 @@ public class BoidsView implements ChangeListener {
 				startStopButton.setText("Stop");
 				numOfBoidsLabel.setVisible(false);
 				numOfBoidsField.setVisible(false);
-			}*/
+			}
 		});
 
 		statePanel.add(BorderLayout.WEST, numOfBoidsLabel);
@@ -132,13 +145,13 @@ public class BoidsView implements ChangeListener {
 	public void stateChanged(ChangeEvent e) {
 		if (e.getSource() == separationSlider) {
 			var val = separationSlider.getValue();
-
+			this.guiAdapter.getGuiActor().tell(new Commands.SetSimulationParams(SimulationParams.SEPARATION, 0.1 * val));
 		} else if (e.getSource() == cohesionSlider) {
 			var val = cohesionSlider.getValue();
-
+			this.guiAdapter.getGuiActor().tell(new Commands.SetSimulationParams(SimulationParams.COHESION, 0.1 * val));
 		} else if (e.getSource() == alignmentSlider) {
 			var val = alignmentSlider.getValue();
-
+			this.guiAdapter.getGuiActor().tell(new Commands.SetSimulationParams(SimulationParams.ALIGNMENT, 0.1 * val));
 		}
 	}
 	

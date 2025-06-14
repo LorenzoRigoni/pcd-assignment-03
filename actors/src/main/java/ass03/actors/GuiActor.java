@@ -31,6 +31,9 @@ public class GuiActor extends AbstractBehavior<Commands> {
         return newReceiveBuilder()
                 .onMessage(Commands.StartSimulation.class, this::onStartSimulation)
                 .onMessage(Commands.PaintBoids.class, this::onPaintBoids)
+                .onMessage(Commands.SetSimulationParams.class, this::onSetSimulationParams)
+                .onMessage(Commands.SuspendSimulation.class, this::onSuspendSimulation)
+                .onMessage(Commands.ResumeSimulation.class, this::onResumeSimulation)
                 .build();
     }
 
@@ -41,8 +44,6 @@ public class GuiActor extends AbstractBehavior<Commands> {
     }
 
     private Behavior<Commands> onPaintBoids(Commands.PaintBoids command) {
-        System.out.println("Start painting boids");
-        System.out.println("Num of Boids: " + command.boids.size());
         this.boidsView.update(this.framerate, command.boids);
         var t1 = System.currentTimeMillis();
         var dtElapsed = t1 - command.initialTime;
@@ -57,7 +58,21 @@ public class GuiActor extends AbstractBehavior<Commands> {
             this.framerate = (int) (1000 / dtElapsed);
 
         this.simulator.tell(new Commands.GuiReady());
-        System.out.println("Completed painting boids");
+        return Behaviors.same();
+    }
+
+    private Behavior<Commands> onSetSimulationParams(Commands.SetSimulationParams command) {
+        this.simulator.tell(command);
+        return Behaviors.same();
+    }
+
+    private Behavior<Commands> onSuspendSimulation(Commands.SuspendSimulation command) {
+        this.simulator.tell(command);
+        return Behaviors.same();
+    }
+
+    private Behavior<Commands> onResumeSimulation(Commands.ResumeSimulation command) {
+        this.simulator.tell(command);
         return Behaviors.same();
     }
 }
