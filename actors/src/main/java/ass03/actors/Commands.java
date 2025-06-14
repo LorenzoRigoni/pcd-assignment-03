@@ -9,6 +9,14 @@ import java.util.List;
 public abstract class Commands {
     private Commands() {}
 
+    public static final class SetGuiActorRef extends Commands {
+        public final ActorRef<Commands> guiActor;
+
+        public SetGuiActorRef(final ActorRef<Commands> guiActor) {
+            this.guiActor = guiActor;
+        }
+    }
+
     public static final class CalculateVelocity extends Commands {
         public final BoidsModel model;
         public final List<Boid> boids;
@@ -49,13 +57,23 @@ public abstract class Commands {
         }
     }
 
+    public static final class PaintBoids extends Commands {
+        public final List<Boid> boids;
+        public final long initialTime;
+
+        public PaintBoids(List<Boid> boids, long initialTime) {
+            this.boids = boids;
+            this.initialTime = initialTime;
+        }
+    }
+
+    public static final class GuiReady extends Commands {}
+
     public static final class StartSimulation extends Commands {
         public final int numOfBoids;
-        public final BoidsModel model;
 
-        public StartSimulation(int numOfBoids, BoidsModel model) {
+        public StartSimulation(int numOfBoids) {
             this.numOfBoids = numOfBoids;
-            this.model = model;
         }
     }
 }

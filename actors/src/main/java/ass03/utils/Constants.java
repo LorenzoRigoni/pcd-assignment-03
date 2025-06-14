@@ -19,4 +19,6 @@ public class Constants {
     public final static int SCREEN_HEIGHT = 800;
 
     public final static int NUM_BOID_ACTORS = Runtime.getRuntime().availableProcessors() + 1;
+
+    public final static int FRAMERATE = 25;
 }

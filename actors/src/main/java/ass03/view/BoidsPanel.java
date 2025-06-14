@@ -1,24 +1,28 @@
 package ass03.view;
 
 import ass03.model.Boid;
-import ass03.model.BoidsModel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import static ass03.utils.Constants.ENVIRONMENT_WIDTH;
 
 public class BoidsPanel extends JPanel {
 
 	private final BoidsView view;
-	private final BoidsModel model;
+    private List<Boid> boids;
     private int framerate;
 
-    public BoidsPanel(BoidsView view, BoidsModel model) {
-    	this.model = model;
+    public BoidsPanel(BoidsView view) {
     	this.view = view;
+        this.boids = new ArrayList<>();
     }
 
-    public void setFrameRate(int framerate) {
+    public void setFrameRate(int framerate, List<Boid> boids) {
     	this.framerate = framerate;
+        this.boids = new ArrayList<>(boids);
     }
     
     @Override
@@ -28,15 +32,13 @@ public class BoidsPanel extends JPanel {
         
         var w = view.getWidth();
         var h = view.getHeight();
-        var envWidth = model.getWidth();
-        var xScale = w/envWidth;
+        var xScale = w/ ENVIRONMENT_WIDTH;
         // var envHeight = model.getHeight();
         // var yScale = h/envHeight;
 
-        var boids = model.getBoids();
 
         g.setColor(Color.BLUE);
-        for (Boid boid : boids) {
+        for (Boid boid : this.boids) {
         	var x = boid.getPos().x();
         	var y = boid.getPos().y();
         	int px = (int)(w/2 + x*xScale);
@@ -45,7 +47,7 @@ public class BoidsPanel extends JPanel {
         }
         
         g.setColor(Color.BLACK);
-        g.drawString("Num. Boids: " + boids.size(), 10, 25);
+        g.drawString("Num. Boids: " + this.boids.size(), 10, 25);
         g.drawString("Framerate: " + framerate, 10, 40);
    }
 }

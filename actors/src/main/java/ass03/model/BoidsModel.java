@@ -44,7 +44,7 @@ public class BoidsModel {
     }
     
     public List<Boid> getBoids(){
-    	return boids;
+    	return new ArrayList<>(boids);
     }
 
     public void setBoids(List<Boid> boids) {

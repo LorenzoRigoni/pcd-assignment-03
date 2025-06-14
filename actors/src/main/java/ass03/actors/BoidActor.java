@@ -3,6 +3,7 @@ package ass03.actors;
 import akka.actor.typed.Behavior;
 import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
+import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 import ass03.model.Boid;
 
@@ -19,6 +20,10 @@ public class BoidActor extends AbstractBehavior<Commands> {
         super(context);
     }
 
+    public static Behavior<Commands> create() {
+        return Behaviors.setup(BoidActor::new);
+    }
+
     @Override
     public Receive<Commands> createReceive() {
         return newReceiveBuilder()
@@ -32,7 +37,7 @@ public class BoidActor extends AbstractBehavior<Commands> {
             boid.updateVelocity(command.model);
         final Commands.VelocityComputed res = new Commands.VelocityComputed(command.boids);
         command.replyTo.tell(res);
-        return this;
+        return Behaviors.same();
     }
 
     private Behavior<Commands> onCalculatePosition(Commands.CalculatePosition command) {
@@ -40,6 +45,6 @@ public class BoidActor extends AbstractBehavior<Commands> {
             boid.updatePos(command.model);
         final Commands.PositionComputed res = new Commands.PositionComputed(command.boids);
         command.replyTo.tell(res);
-        return this;
+        return Behaviors.same();
     }
 }

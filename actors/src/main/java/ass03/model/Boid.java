@@ -123,4 +123,12 @@ public class Boid {
         	return new V2d(0, 0);
         }
     }
+
+    @Override
+    public String toString() {
+        return "Boid{" +
+                "pos=" + pos +
+                ", vel=" + vel +
+                '}';
+    }
 }
