@@ -1,7 +1,6 @@
 package ass03.view;
 
-import ass03.actors.Commands;
-import ass03.actors.SimulationParams;
+import ass03.utils.SimulationParams;
 import ass03.model.Boid;
 
 import javax.swing.*;
@@ -17,15 +16,15 @@ public class BoidsView implements ChangeListener {
 	private BoidsPanel boidsPanel;
 	private final JSlider cohesionSlider, separationSlider, alignmentSlider;
 	private final JButton suspendResumeButton;
-	private final GuiAdapter guiAdapter;
+	private final GuiActorWrapper guiActorWrapper;
 	private final int width, height;
 	private boolean isStopped;
 	private boolean isSuspended;
 	
-	public BoidsView(int width, int height, GuiAdapter guiAdapter) {
+	public BoidsView(int width, int height, GuiActorWrapper guiActorWrapper) {
 		this.width = width;
 		this.height = height;
-		this.guiAdapter = guiAdapter;
+		this.guiActorWrapper = guiActorWrapper;
 		this.isStopped = true;
 		this.isSuspended = false;
 		
@@ -48,11 +47,11 @@ public class BoidsView implements ChangeListener {
 			if (this.isSuspended) {
 				this.isSuspended = false;
 				this.suspendResumeButton.setText("Suspend");
-				this.guiAdapter.getGuiActor().tell(new Commands.ResumeSimulation());
+				this.guiActorWrapper.sendCommandToActor(SimulationCommands.RESUME_SIMULATION);
 			} else {
 				this.isSuspended = true;
 				this.suspendResumeButton.setText("Resume");
-				this.guiAdapter.getGuiActor().tell(new Commands.SuspendSimulation());
+				this.guiActorWrapper.sendCommandToActor(SimulationCommands.SUSPEND_SIMULATION);
 			}
 		});
 
@@ -96,11 +95,11 @@ public class BoidsView implements ChangeListener {
 				cp.add(BorderLayout.CENTER, boidsPanel);
 				cp.revalidate();
 				cp.repaint();
-				this.guiAdapter.getGuiActor().tell(new Commands.StartSimulation(numOfBoids));
+				this.guiActorWrapper.sendCommandToActor(SimulationCommands.startSimulation(numOfBoids));
 			} else if(!this.isStopped && !this.isSuspended) {
 				this.isStopped = true;
 				this.suspendResumeButton.setEnabled(false);
-				this.guiAdapter.getGuiActor().tell(new Commands.StopSimulation());
+				this.guiActorWrapper.sendCommandToActor(SimulationCommands.STOP_SIMULATION);
 			} else if(this.isSuspended) {
 				JOptionPane.showMessageDialog(frame, "You cannot stop the simulation while the simulation is suspended");
 			} else {
@@ -151,13 +150,13 @@ public class BoidsView implements ChangeListener {
 	public void stateChanged(ChangeEvent e) {
 		if (e.getSource() == separationSlider) {
 			var val = separationSlider.getValue();
-			this.guiAdapter.getGuiActor().tell(new Commands.SetSimulationParams(SimulationParams.SEPARATION, 0.1 * val));
+			this.guiActorWrapper.sendCommandToActor(SimulationCommands.setParams(SimulationParams.SEPARATION, 0.1 * val));
 		} else if (e.getSource() == cohesionSlider) {
 			var val = cohesionSlider.getValue();
-			this.guiAdapter.getGuiActor().tell(new Commands.SetSimulationParams(SimulationParams.COHESION, 0.1 * val));
+			this.guiActorWrapper.sendCommandToActor(SimulationCommands.setParams(SimulationParams.COHESION, 0.1 * val));
 		} else if (e.getSource() == alignmentSlider) {
 			var val = alignmentSlider.getValue();
-			this.guiAdapter.getGuiActor().tell(new Commands.SetSimulationParams(SimulationParams.ALIGNMENT, 0.1 * val));
+			this.guiActorWrapper.sendCommandToActor(SimulationCommands.setParams(SimulationParams.ALIGNMENT, 0.1 * val));
 		}
 	}
 	

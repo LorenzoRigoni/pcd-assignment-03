@@ -10,18 +10,27 @@ import ass03.view.BoidsView;
 
 import static ass03.utils.Constants.FRAMERATE;
 
+/**
+ * This actor manages the GUI.
+ */
 public class GuiActor extends AbstractBehavior<Commands> {
     private final ActorRef<Commands> simulator;
     private final BoidsView boidsView;
     private int framerate;
 
-    public GuiActor(ActorContext<Commands> context, ActorRef<Commands> simulator, BoidsView boidsView) {
+    private GuiActor(ActorContext<Commands> context, ActorRef<Commands> simulator, BoidsView boidsView) {
         super(context);
         this.simulator = simulator;
         this.boidsView = boidsView;
         this.simulator.tell(new Commands.SetGuiActorRef(getContext().getSelf()));
     }
 
+    /**
+     * Create a new gui actor.
+     * @param simulator The reference to the simulator actor
+     * @param boidsView The reference to the view
+     * @return A new gui actor
+     */
     public static Behavior<Commands> create(ActorRef<Commands> simulator, BoidsView boidsView) {
         return Behaviors.setup(context -> new GuiActor(context, simulator, boidsView));
     }

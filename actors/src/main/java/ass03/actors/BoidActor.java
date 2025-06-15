@@ -8,7 +8,7 @@ import akka.actor.typed.javadsl.Receive;
 import ass03.model.Boid;
 
 /**
- * This actor contains a sublist of boids. He receives two types of commands:
+ * This actor manages a sublist of boids. It performs two types of calculations:
  * <ul>
  *     <li>Calc the velocities of each boid;</li>
  *     <lI>Calc the position of each boid.</lI>
@@ -16,10 +16,14 @@ import ass03.model.Boid;
  */
 public class BoidActor extends AbstractBehavior<Commands> {
 
-    public BoidActor(ActorContext<Commands> context) {
+    private BoidActor(ActorContext<Commands> context) {
         super(context);
     }
 
+    /**
+     * Create a new boid actor.
+     * @return A new boid actor
+     */
     public static Behavior<Commands> create() {
         return Behaviors.setup(BoidActor::new);
     }
@@ -35,16 +39,14 @@ public class BoidActor extends AbstractBehavior<Commands> {
     private Behavior<Commands> onCalculateVelocity(Commands.CalculateVelocity command) {
         for (final Boid boid : command.boids)
             boid.updateVelocity(command.model);
-        final Commands.VelocityComputed res = new Commands.VelocityComputed(command.boids);
-        command.replyTo.tell(res);
+        command.replyTo.tell(new Commands.VelocityCalculated(command.boids));
         return Behaviors.same();
     }
 
     private Behavior<Commands> onCalculatePosition(Commands.CalculatePosition command) {
         for (final Boid boid : command.boids)
             boid.updatePos(command.model);
-        final Commands.PositionComputed res = new Commands.PositionComputed(command.boids);
-        command.replyTo.tell(res);
+        command.replyTo.tell(new Commands.PositionCalculated(command.boids));
         return Behaviors.same();
     }
 }
