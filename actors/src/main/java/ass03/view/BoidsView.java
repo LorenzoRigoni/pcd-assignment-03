@@ -87,7 +87,7 @@ public class BoidsView implements ChangeListener {
 
 		final JButton startStopButton = new JButton("Start");
 		startStopButton.addActionListener(e -> {
-			if(this.isInputPositiveInteger(numOfBoidsField.getText())) {
+			if(this.isInputPositiveInteger(numOfBoidsField.getText()) && this.isStopped) {
 				this.suspendResumeButton.setEnabled(true);
 				this.isStopped = false;
 				int numOfBoids = Integer.parseInt(numOfBoidsField.getText());
@@ -97,6 +97,12 @@ public class BoidsView implements ChangeListener {
 				cp.revalidate();
 				cp.repaint();
 				this.guiAdapter.getGuiActor().tell(new Commands.StartSimulation(numOfBoids));
+			} else if(!this.isStopped && !this.isSuspended) {
+				this.isStopped = true;
+				this.suspendResumeButton.setEnabled(false);
+				this.guiAdapter.getGuiActor().tell(new Commands.StopSimulation());
+			} else if(this.isSuspended) {
+				JOptionPane.showMessageDialog(frame, "You cannot stop the simulation while the simulation is suspended");
 			} else {
 				JOptionPane.showMessageDialog(frame, "The input entered is not a positive integer");
 			}

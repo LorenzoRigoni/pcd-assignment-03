@@ -34,11 +34,11 @@ public class GuiActor extends AbstractBehavior<Commands> {
                 .onMessage(Commands.SetSimulationParams.class, this::onSetSimulationParams)
                 .onMessage(Commands.SuspendSimulation.class, this::onSuspendSimulation)
                 .onMessage(Commands.ResumeSimulation.class, this::onResumeSimulation)
+                .onMessage(Commands.StopSimulation.class, this::onStopSimulation)
                 .build();
     }
 
     private Behavior<Commands> onStartSimulation(Commands.StartSimulation command) {
-        System.out.println("Starting Simulation");
         this.simulator.tell(new Commands.StartSimulation(command.numOfBoids));
         return Behaviors.same();
     }
@@ -72,6 +72,11 @@ public class GuiActor extends AbstractBehavior<Commands> {
     }
 
     private Behavior<Commands> onResumeSimulation(Commands.ResumeSimulation command) {
+        this.simulator.tell(command);
+        return Behaviors.same();
+    }
+
+    private Behavior<Commands> onStopSimulation(Commands.StopSimulation command) {
         this.simulator.tell(command);
         return Behaviors.same();
     }

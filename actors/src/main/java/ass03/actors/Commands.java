@@ -90,4 +90,6 @@ public abstract class Commands {
     public static final class SuspendSimulation extends Commands {}
 
     public static final class ResumeSimulation extends Commands {}
+
+    public static final class StopSimulation extends Commands {}
 }

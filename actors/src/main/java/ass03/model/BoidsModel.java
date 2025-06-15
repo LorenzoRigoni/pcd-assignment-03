@@ -48,7 +48,10 @@ public class BoidsModel {
     }
 
     public void setBoids(List<Boid> boids) {
-        this.boids = boids;
+        if (boids.isEmpty())
+            this.boids.clear();
+        else
+            this.boids = new ArrayList<>(boids);
     }
     
     public double getMinX() {

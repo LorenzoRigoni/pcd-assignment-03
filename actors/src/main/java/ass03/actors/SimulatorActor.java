@@ -21,6 +21,7 @@ public class SimulatorActor extends AbstractBehavior<Commands> {
     private int numOfBoids;
     private BoidsModel model;
     private boolean isSuspended;
+    private boolean isStopped;
 
     public SimulatorActor(ActorContext<Commands> context, ActorRef<Commands> guiActor) {
         super(context);
@@ -29,6 +30,7 @@ public class SimulatorActor extends AbstractBehavior<Commands> {
         this.collectedBoids = new ArrayList<>();
         this.boidsLists = new ArrayList<>();
         this.isSuspended = false;
+        this.isStopped = true;
     }
 
     public static Behavior<Commands> create(ActorRef<Commands> guiActor) {
@@ -46,6 +48,7 @@ public class SimulatorActor extends AbstractBehavior<Commands> {
                 .onMessage(Commands.SetSimulationParams.class, this::onSetSimulationParams)
                 .onMessage(Commands.SuspendSimulation.class, this::onSuspendSimulation)
                 .onMessage(Commands.ResumeSimulation.class, this::onResumeSimulation)
+                .onMessage(Commands.StopSimulation.class, this::onStopSimulation)
                 .build();
     }
 
@@ -55,7 +58,7 @@ public class SimulatorActor extends AbstractBehavior<Commands> {
     }
 
     private Behavior<Commands> onStartSimulation(Commands.StartSimulation command) {
-        //System.out.println("Simulation started");
+        this.isStopped = false;
         this.numOfBoids = command.numOfBoids;
         this.model = new BoidsModel(SEPARATION_WEIGHT, ALIGNMENT_WEIGHT, COHESION_WEIGHT,
                 ENVIRONMENT_WIDTH, ENVIRONMENT_HEIGHT,
@@ -70,8 +73,15 @@ public class SimulatorActor extends AbstractBehavior<Commands> {
     }
 
     private Behavior<Commands> onGuiReady(Commands.GuiReady command) {
-        if (!this.isSuspended) {
+        if (!this.isSuspended && !this.isStopped) {
             this.restartCycle();
+        } else if (this.isStopped) {
+            this.collectedBoids.clear();
+            this.boidsLists.clear();
+            this.model.setBoids(new ArrayList<>());
+            for (final ActorRef<Commands> boidActor : this.boidActors)
+                getContext().stop(boidActor);
+            this.boidActors.clear();
         }
         return Behaviors.same();
     }
@@ -92,9 +102,7 @@ public class SimulatorActor extends AbstractBehavior<Commands> {
         this.collectedBoids.addAll(command.boids);
         this.velocityReplies++;
         if (this.velocityReplies == NUM_BOID_ACTORS) {
-            //System.out.println("Completed calc velocity");
             this.updateBoids();
-            //System.out.println("Start calc position");
             this.sendPositionCommands();
         }
         return Behaviors.same();
@@ -113,8 +121,6 @@ public class SimulatorActor extends AbstractBehavior<Commands> {
         this.positionReplies++;
         if (this.positionReplies == NUM_BOID_ACTORS) {
             this.updateBoids();
-            //System.out.println("Completed calc position");
-            //System.out.println(this.guiActor);
             this.guiActor.tell(new Commands.PaintBoids(this.collectedBoids, this.initialTime));
         }
         return Behaviors.same();
@@ -145,6 +151,11 @@ public class SimulatorActor extends AbstractBehavior<Commands> {
     private Behavior<Commands> onResumeSimulation(Commands.ResumeSimulation command) {
         this.isSuspended = false;
         this.restartCycle();
+        return Behaviors.same();
+    }
+
+    private Behavior<Commands> onStopSimulation(Commands.StopSimulation command) {
+        this.isStopped = true;
         return Behaviors.same();
     }
 

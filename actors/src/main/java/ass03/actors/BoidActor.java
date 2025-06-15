@@ -8,7 +8,7 @@ import akka.actor.typed.javadsl.Receive;
 import ass03.model.Boid;
 
 /**
- * This actor represents a sublist of boids. He receives two type of commands:
+ * This actor contains a sublist of boids. He receives two types of commands:
  * <ul>
  *     <li>Calc the velocities of each boid;</li>
  *     <lI>Calc the position of each boid.</lI>
