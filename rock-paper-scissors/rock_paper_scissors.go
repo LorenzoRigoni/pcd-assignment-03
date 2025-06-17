@@ -39,10 +39,9 @@ func player(name string, requestChan chan MoveRequest, resultChan chan Result) {
 	scoreLoss := 0
 
 	for {
+		req := <-requestChan
 		move := moves[rand.Intn(3)]
-		moveReply := make(chan string, 1) //Create a buffered chan to avoid deadlocks
-		moveReply <- move
-		requestChan <- MoveRequest{move: moveReply}
+		req.move <- move
 
 		result := <-resultChan
 		if result.win {
@@ -63,12 +62,15 @@ func player(name string, requestChan chan MoveRequest, resultChan chan Result) {
 	This function represents the referee. He receives the two moves from the players, calc the result and send it to each player.
 */
 func referee(p1ReqChan, p2ReqChan chan MoveRequest, p1ResChan, p2ResChan chan Result) {
+	move1Chan := make(chan string)
+	move2Chan := make(chan string)
+	
 	for {
-		req1 := <-p1ReqChan
-		req2 := <-p2ReqChan
+		p1ReqChan <- MoveRequest{move: move1Chan}
+		p2ReqChan <- MoveRequest{move: move2Chan}
 
-		move1 := <-req1.move
-		move2 := <-req2.move
+		move1 := <-move1Chan
+		move2 := <-move2Chan
 
 		fmt.Printf("[Referee] Player1: %s | Player2: %s\n", move1, move2)
 
