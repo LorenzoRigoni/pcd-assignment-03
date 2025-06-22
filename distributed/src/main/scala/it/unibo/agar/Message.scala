@@ -23,4 +23,6 @@ object PlayerProtocol:
   case class FoodCollision(food: Food) extends PlayerMessage
   case class PlayerCollision(player: Player) extends PlayerMessage
   case class CurrentScore(score: Double) extends PlayerMessage
+  case class RequestCurrentMass(replyTo: ActorRef[PlayerMessage]) extends PlayerMessage //interaction with request-response
+  case class CurrentMass(mass: Double) extends PlayerMessage
 
