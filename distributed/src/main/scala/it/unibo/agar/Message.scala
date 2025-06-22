@@ -1,5 +1,6 @@
 package it.unibo.agar
 
+import akka.actor.typed.ActorRef
 import it.unibo.agar.model.{Food, Player}
 
 /** Tag interface for all messages sends by actors */
@@ -12,6 +13,8 @@ object WorldProtocol:
   case class RemovePlayer(playerId: String) extends WorldMessage
   case class UpdatePlayerScore(playerId: String, newScore: Double) extends WorldMessage
   case class NotifyVictory(playerId: String, score: Double) extends WorldMessage
+  case class RegisterPlayer(playerId: String, initialX: Double, initialY: Double, initialMass: Double = 100.0, replyTo: ActorRef[PlayerRegistered]) extends WorldMessage
+  case class PlayerRegistered(playerRef: ActorRef[PlayerProtocol.PlayerMessage]) extends WorldMessage
 
 object PlayerProtocol:
   trait PlayerMessage extends Message
