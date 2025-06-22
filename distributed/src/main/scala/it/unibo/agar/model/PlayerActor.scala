@@ -13,15 +13,20 @@ object PlayerActor:
   def apply(playerId: String, initialX: Double, initialY: Double,
             initialScore: Double, worldManager: ActorRef[WorldProtocol.WorldMessage]) : Behavior[PlayerMessage] =
     Behaviors.setup[PlayerMessage]: context =>
-
-      val scoreActor = context.spawn(ScoreManagerActor(playerId, initialScore, worldManager), s"points-$playerId")
-      val collisionActor = context.spawn(CollisionManagerActor(playerId, scoreActor, worldManager), s"collisions-$playerId")
-      val movementActor = context.spawn(PlayerMovementActor(playerId, initialX, initialY, worldManager), s"move-$playerId")
-
+      var winScore = 1000
+      var worldWidth: Int = 1000
+      var worldHeight: Int = 1000
+      var speed: Double = 10.0
+  
       //creo i tre sottoattori che gestiscono collisioni, punteggio e movimento del player
+      val scoreActor = context.spawn(ScoreManagerActor(playerId, initialScore, winScore, worldManager), s"points-$playerId")
+      val collisionActor = context.spawn(CollisionManagerActor(playerId, scoreActor, worldManager), s"collisions-$playerId")
+      val movementActor = context.spawn(PlayerMovementActor(playerId, initialX, initialY,worldWidth, worldHeight, speed, worldManager), s"move-$playerId")
+
+      //smisto i messaggi tra i vari sottoattori
       Behaviors.receiveMessage[PlayerMessage]:
-        case Move(x, y) => ???
-        case Tick => ???
-        case FoodCollision(food) => ???
-        case PlayerCollision(player) => ???
-        case CurrentScore(score) => ???
+        case Move(x, y) => movementActor ! Move(x,y); Behaviors.same
+        case Tick => movementActor ! Tick; Behaviors.same
+        case FoodCollision(food) => collisionActor ! FoodCollision(food); Behaviors.same
+        case PlayerCollision(player) => collisionActor ! PlayerCollision(player); Behaviors.same
+        case CurrentScore(score) => scoreActor ! CurrentScore(score); Behaviors.same
