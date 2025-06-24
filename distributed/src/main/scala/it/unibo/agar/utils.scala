@@ -4,7 +4,10 @@ import akka.actor.typed.ActorSystem
 import akka.actor.typed.Behavior
 import com.typesafe.config.ConfigFactory
 
-val seeds = List(2551, 2552) // seed used in the configuration
+object GameConf:
+  val seeds = List(2551, 2552) // seed used in the configuration
+  val worldHeight = 1000
+  val worldWidth = 1000
 
 def startup[X](file: String = "base-cluster", port: Int)(root: => Behavior[X]): ActorSystem[X] =
   // Override the configuration of the port

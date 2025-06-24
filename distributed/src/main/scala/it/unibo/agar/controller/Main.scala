@@ -33,8 +33,8 @@ object Main extends SimpleSwingApplication:
 
   override def top: Frame =
     // Open both views at startup
-    new GlobalView(manager).open()
-    new LocalView(manager, "p1").open()
-    new LocalView(manager, "p2").open()
+    //new GlobalView(manager).open()
+    //new LocalView(manager, "p1").open()
+   // new LocalView(manager, "p2").open()
     // No launcher window, just return an empty frame (or null if allowed)
     new Frame { visible = false }

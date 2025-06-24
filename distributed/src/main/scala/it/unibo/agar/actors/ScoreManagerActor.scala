@@ -1,4 +1,4 @@
-package it.unibo.agar.model
+package it.unibo.agar.actors
 
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorRef, Behavior}

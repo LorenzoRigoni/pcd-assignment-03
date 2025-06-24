@@ -1,4 +1,4 @@
-package it.unibo.agar.model
+package it.unibo.agar.actors
 
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorRef, Behavior}
@@ -14,6 +14,7 @@ object PlayerMovementActor:
             worldWidth: Int,
             worldHeight: Int,
             speed: Double,
+            playerActor: ActorRef[PlayerProtocol.PlayerMessage],
             worldManager: ActorRef[WorldProtocol.WorldMessage]): Behavior[PlayerMessage] =
     Behaviors.setup{ context =>
       var x = initialX
@@ -32,6 +33,7 @@ object PlayerMovementActor:
           x = (x + dx * speed).max(0).min(worldWidth)
           y = (y + dy * speed).max(0).min(worldHeight)
           worldManager ! UpdatePlayerMovement(playerId, x, y)
+          playerActor ! PlayerProtocol.CurrentPosition(x,y)
           Behaviors.same
         case _ => Behaviors.unhandled
       }

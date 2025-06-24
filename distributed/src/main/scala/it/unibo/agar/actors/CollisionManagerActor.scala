@@ -1,8 +1,9 @@
-package it.unibo.agar.model
+package it.unibo.agar.actors
 
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorRef, Behavior}
 import it.unibo.agar.WorldProtocol.{RemoveFood, RemovePlayer, WorldMessage}
+import it.unibo.agar.model.{EatingManager, Food, Player}
 
 object CollisionManagerActor:
 
