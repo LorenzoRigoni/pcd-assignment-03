@@ -1,40 +1,54 @@
 package it.unibo.agar.controller
+import akka.actor.typed.*
+import akka.actor.typed.scaladsl.*
+import akka.cluster.ClusterEvent
+import akka.cluster.typed.*
+import com.typesafe.config.ConfigFactory
+import it.unibo.agar.GameConf.*
+import it.unibo.agar.WorldProtocol
+import it.unibo.agar.actors.{PlayerActor, WorldManagerActor}
 
-import it.unibo.agar.model.AIMovement
-import it.unibo.agar.model.GameInitializer
-import it.unibo.agar.model.MockGameStateManager
-import it.unibo.agar.model.World
-import it.unibo.agar.view.GlobalView
-import it.unibo.agar.view.LocalView
+import scala.util.Random
 
-import java.awt.Window
-import java.util.Timer
-import java.util.TimerTask
-import scala.swing.*
-import scala.swing.Swing.onEDT
+object Main:
 
-object Main extends SimpleSwingApplication:
+  sealed trait InternalCommand
+  private final case class WrappedClusterEvent(event: ClusterEvent.MemberEvent) extends InternalCommand
 
-  private val width = 1000
-  private val height = 1000
-  private val numPlayers = 4
-  private val numFoods = 100
-  private val players = GameInitializer.initialPlayers(numPlayers, width, height)
-  private val foods = GameInitializer.initialFoods(numFoods, width, height)
-  private val manager = new MockGameStateManager(World(width, height, players, foods))
+  def apply(): Behavior[InternalCommand] = Behaviors.setup { context =>
+    val cluster = Cluster(context.system)
 
-  private val timer = new Timer()
-  private val task: TimerTask = new TimerTask:
-    override def run(): Unit =
-      AIMovement.moveAI("p1", manager)
-      manager.tick()
-      onEDT(Window.getWindows.foreach(_.repaint()))
-  timer.scheduleAtFixedRate(task, 0, 30) // every 30ms
+    // Adattatore per eventi cluster
+    val clusterEventAdapter = context.messageAdapter[ClusterEvent.MemberEvent](WrappedClusterEvent)
+    cluster.subscriptions ! Subscribe(clusterEventAdapter, classOf[ClusterEvent.MemberEvent])
 
-  override def top: Frame =
-    // Open both views at startup
-    //new GlobalView(manager).open()
-    //new LocalView(manager, "p1").open()
-   // new LocalView(manager, "p2").open()
-    // No launcher window, just return an empty frame (or null if allowed)
-    new Frame { visible = false }
+    val system = context.system
+
+    // Se sei il primo nodo, avvia i singleton
+    if (cluster.selfMember.address.port.contains(2551)) then
+      context.log.info("Primo nodo: avvio WorldManager singleton")
+      ClusterSingleton(system).init(
+        SingletonActor(WorldManagerActor(), "WorldManager").withStopMessage(WorldProtocol.NotifyVictory("dummy", 0))
+      )
+    else
+      context.log.info("Nodo client: attendo WorldManager nel cluster")
+
+    // Proxy al WorldManager (funziona anche se non è locale)
+    val worldManager = ClusterSingleton(system).init(
+      SingletonActor(Behaviors.empty, "WorldManager").withStopMessage(WorldProtocol.Stop)
+    )
+
+    // Crea il PlayerActor
+    val playerName = s"Player-${Random.between(1000, 9999)}"
+    context.spawn(PlayerActor(playerName,Random.nextInt(worldWidth), Random.nextInt(worldHeight), initialPlayerMass, worldManager), playerName)
+
+    Behaviors.receiveMessage {
+      case WrappedClusterEvent(event) =>
+        context.log.info(s"Evento cluster: $event")
+        Behaviors.same
+    }
+  }
+
+  @main def run(): Unit =
+    val config = ConfigFactory.load("agario")
+    ActorSystem(Main(), "agario", config)

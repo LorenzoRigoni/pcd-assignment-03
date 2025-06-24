@@ -2,18 +2,18 @@ package it.unibo.agar.actors
 
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorRef, Behavior}
+import it.unibo.agar.GameConf._
 import it.unibo.agar.WorldProtocol.*
 import it.unibo.agar.model.World
 import it.unibo.agar.{PlayerProtocol, ViewProtocol}
 
 object WorldManagerActor:
-  def apply(initialWorld: World, victoryScore: Double = 1000.0): Behavior[WorldMessage] =
+  def apply(): Behavior[WorldMessage] =
     Behaviors.setup { context =>
-      var world = initialWorld
+      var world = World(worldWidth, worldHeight, Seq.empty, Seq.empty)
       var players: Map[String, ActorRef[PlayerProtocol.PlayerMessage]] = Map.empty //mappa playerID -> ActorRef Player actor
       var views: Map[String, ActorRef[ViewProtocol.ViewMessage]] = Map.empty //mappa playerID -> ActorRef view Actor
-
-
+      
       Behaviors.receiveMessage {
         
         case UpdatePlayerMovement(playerId, x, y) =>
@@ -44,5 +44,9 @@ object WorldManagerActor:
         case NotifyVictory(playerId, score) =>
           context.log.info(s"Player $playerId wins! Score: $score")
           Behaviors.stopped
+
+        case Stop =>
+          context.log.info("Stopping WorldManagerActor via stop message")
+          Behaviors.stopped  
       }
     }
