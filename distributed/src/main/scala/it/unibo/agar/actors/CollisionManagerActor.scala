@@ -15,21 +15,27 @@ object CollisionManagerActor:
     Behaviors.setup { context =>
       var pendingFood: Option[Food] = None
       var pendingPlayer: Option[Player] = None
+      var currentPlayerX: Double= 0
+      var currentPlayerY: Double = 0
 
       Behaviors.receiveMessage {
-        case FoodCollision(food) =>
+        case FoodCollision(food, x, y) =>
           pendingFood = Some(food)
+          currentPlayerX = x
+          currentPlayerY = y
           scoreManager ! RequestCurrentMass(context.self)
           Behaviors.same
 
-        case PlayerCollision(otherPlayer) =>
+        case PlayerCollision(otherPlayer, x, y) =>
           pendingPlayer = Some(otherPlayer)
+          currentPlayerX = x
+          currentPlayerY = y
           scoreManager ! RequestCurrentMass(context.self)
           Behaviors.same
 
         case CurrentMass(mass) =>
           pendingFood.foreach { food =>
-            if EatingManager.canEatFood(Player(playerId, 0, 0, mass), food) then
+            if EatingManager.canEatFood(Player(playerId, currentPlayerX, currentPlayerY, mass), food) then //passare coordinate player
               context.log.info(s"Player $playerId ate food ${food.id}")
               scoreManager ! CurrentScore(food.mass)
               worldManager ! RemoveFood(food.id)
@@ -37,7 +43,7 @@ object CollisionManagerActor:
           pendingFood = None
 
           pendingPlayer.foreach { other =>
-            if EatingManager.canEatPlayer(Player(playerId, 0, 0, mass), other) then
+            if EatingManager.canEatPlayer(Player(playerId, currentPlayerX, currentPlayerY, mass), other) then //passare coordinate player
               context.log.info(s"Player $playerId ate player ${other.id}")
               scoreManager ! CurrentScore(other.mass)
               worldManager ! RemovePlayer(other.id)

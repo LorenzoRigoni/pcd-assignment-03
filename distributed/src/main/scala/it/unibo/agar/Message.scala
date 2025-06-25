@@ -10,6 +10,7 @@ trait Message
 object WorldProtocol:
   trait WorldMessage extends Message
   case class UpdatePlayerMovement(playerId: String, x: Double, y:Double) extends WorldMessage
+  case object GenerateFood extends WorldMessage
   case class RemoveFood(foodId: String) extends WorldMessage
   case class RemovePlayer(playerId: String) extends WorldMessage
   case class UpdatePlayerScore(playerId: String, newScore: Double) extends WorldMessage
@@ -23,12 +24,11 @@ object PlayerProtocol:
   trait PlayerMessage extends Message
   case class Move(dx: Double, dy: Double) extends PlayerMessage
   case object Tick extends PlayerMessage
-  case class FoodCollision(food: Food) extends PlayerMessage
-  case class PlayerCollision(player: Player) extends PlayerMessage
+  case class FoodCollision(food: Food,playerX: Double, playerY: Double) extends PlayerMessage
+  case class PlayerCollision(player: Player,playerX: Double, playerY: Double) extends PlayerMessage
   case class CurrentScore(score: Double) extends PlayerMessage
   case class RequestCurrentMass(replyTo: ActorRef[CurrentMass]) extends PlayerMessage //interaction with request-response
   case class CurrentMass(mass: Double) extends PlayerMessage
-  case class CurrentPosition(x: Double, y:Double) extends PlayerMessage
 
 
 object ViewProtocol:

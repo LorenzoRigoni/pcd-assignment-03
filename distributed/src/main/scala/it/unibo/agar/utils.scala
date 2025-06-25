@@ -12,6 +12,8 @@ object GameConf:
   val worldHeight = 1000
   val worldWidth = 1000
   val initialPlayerMass: Double = 120.0
+  val numFood = 150
+  val foodMass = 100.0
 
 def startup[X](file: String = "base-cluster", port: Int)(root: => Behavior[X]): ActorSystem[X] =
   // Override the configuration of the port

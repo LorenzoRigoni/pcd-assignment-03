@@ -24,17 +24,20 @@ object PlayerMovementActor:
 
       Behaviors.receiveMessage{
         //Cambio di direzione del player 
-        case PlayerProtocol.Move(newDx, newDy) => 
+        case PlayerProtocol.Move(newDx, newDy) =>
+          context.log.info(s"PlayerMovementActor: direction updated to ($newDx, $newDy)")
           direction = (newDx, newDy)
           Behaviors.same
+
         //aggiornamento della posizione e notifica al World  
         case PlayerProtocol.Tick =>
           val (dx, dy) = direction
           x = (x + dx * speed).max(0).min(worldWidth)
           y = (y + dy * speed).max(0).min(worldHeight)
+          context.log.info(s"PlayerMovementActor: position updated to ($x, $y)")
           worldManager ! UpdatePlayerMovement(playerId, x, y)
-          playerActor ! PlayerProtocol.CurrentPosition(x,y)
           Behaviors.same
+
         case _ => Behaviors.unhandled
       }
     }

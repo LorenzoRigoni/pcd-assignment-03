@@ -5,7 +5,7 @@ object EatingManager:
   private val MASS_MARGIN = 1.1 // 10% bigger to eat
 
   // Check if two entities collide
-  private def collides(e1: Entity, e2: Entity): Boolean =
+   def collides(e1: Entity, e2: Entity): Boolean =
     e1.distanceTo(e2) < (e1.radius + e2.radius)
 
   // Determines if a player can eat a food
