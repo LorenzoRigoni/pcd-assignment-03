@@ -5,12 +5,16 @@ import akka.actor.typed.{ActorRef, Behavior}
 import it.unibo.agar.view.LocalView
 import it.unibo.agar.{PlayerProtocol, ViewProtocol, WorldProtocol}
 
-object ViewActor {
+object ViewActor:
 
-  def apply(playerId: String,playerActor: ActorRef[PlayerProtocol.PlayerMessage], worldManager: ActorRef[WorldProtocol.WorldMessage]): Behavior[ViewProtocol.ViewMessage] =
+  def apply(playerId: String,
+            playerActor: ActorRef[PlayerProtocol.PlayerMessage],
+            worldManager: ActorRef[WorldProtocol.WorldMessage]
+           ): Behavior[ViewProtocol.ViewMessage] =
     Behaviors.setup { context =>
-      
-      var view =  LocalView(context.self, playerId, playerActor)
+
+      val view = new LocalView(context.self, playerId, playerActor)
+      view.visible = true // per mostrare la finestra
 
       Behaviors.receiveMessage {
 
@@ -18,7 +22,8 @@ object ViewActor {
           playerActor ! PlayerProtocol.Move(dx, dy)
           Behaviors.same
 
-        case _ => Behaviors.same
+        case ViewProtocol.UpdateView(world) =>
+          view.updateWorld(world) // aggiorna stato e chiama repaint()
+          Behaviors.same
       }
     }
-}

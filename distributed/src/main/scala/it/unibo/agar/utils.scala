@@ -2,7 +2,10 @@ package it.unibo.agar
 
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.Behavior
+import akka.actor.typed.scaladsl.Behaviors
 import com.typesafe.config.ConfigFactory
+
+import java.net.InetAddress
 
 object GameConf:
   val seeds = List(2551, 2552) // seed used in the configuration
@@ -20,8 +23,11 @@ def startup[X](file: String = "base-cluster", port: Int)(root: => Behavior[X]): 
   ActorSystem(root, file, config)
 
 def startupWithRole[X](role: String, port: Int)(root: => Behavior[X]): ActorSystem[X] =
+  val hostname = InetAddress.getLocalHost.getHostAddress
+  
   val config = ConfigFactory
     .parseString(s"""
+      akka.remote.artery.canonical.hostname = "$hostname"
       akka.remote.artery.canonical.port=$port
       akka.cluster.roles = [$role]
       """)

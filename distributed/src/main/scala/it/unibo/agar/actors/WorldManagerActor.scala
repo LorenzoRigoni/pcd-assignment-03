@@ -7,14 +7,29 @@ import it.unibo.agar.WorldProtocol.*
 import it.unibo.agar.model.World
 import it.unibo.agar.{PlayerProtocol, ViewProtocol}
 
+import scala.concurrent.duration._
+
 object WorldManagerActor:
-  def apply(): Behavior[WorldMessage] =
+  def apply(initialWorld: World): Behavior[WorldMessage] =
     Behaviors.setup { context =>
-      var world = World(worldWidth, worldHeight, Seq.empty, Seq.empty)
+      import context.executionContext
+
+      var world = initialWorld
       var players: Map[String, ActorRef[PlayerProtocol.PlayerMessage]] = Map.empty //mappa playerID -> ActorRef Player actor
       var views: Map[String, ActorRef[ViewProtocol.ViewMessage]] = Map.empty //mappa playerID -> ActorRef view Actor
+
+      context.system.scheduler.scheduleWithFixedDelay(0.millis, 50.millis) { () =>
+        views.values.foreach { viewRef =>
+          viewRef ! ViewProtocol.UpdateView(world)
+        }
+      }
       
       Behaviors.receiveMessage {
+
+        case RegisterView(playerId, viewRef) =>
+          context.log.info(s"Registering world for plater $playerId")
+          views = views + (playerId -> viewRef)
+          Behaviors.same
         
         case UpdatePlayerMovement(playerId, x, y) =>
           players.get(playerId).foreach { playerRef =>

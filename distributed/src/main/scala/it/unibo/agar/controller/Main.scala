@@ -7,6 +7,7 @@ import com.typesafe.config.ConfigFactory
 import it.unibo.agar.GameConf.*
 import it.unibo.agar.WorldProtocol
 import it.unibo.agar.actors.{PlayerActor, WorldManagerActor}
+import it.unibo.agar.model.World
 
 import scala.util.Random
 
@@ -24,23 +25,17 @@ object Main:
 
     val system = context.system
 
-    // Se sei il primo nodo, avvia i singleton
-    if (cluster.selfMember.address.port.contains(2551)) then
-      context.log.info("Primo nodo: avvio WorldManager singleton")
-      ClusterSingleton(system).init(
-        SingletonActor(WorldManagerActor(), "WorldManager").withStopMessage(WorldProtocol.NotifyVictory("dummy", 0))
-      )
-    else
-      context.log.info("Nodo client: attendo WorldManager nel cluster")
-
-    // Proxy al WorldManager (funziona anche se non è locale)
     val worldManager = ClusterSingleton(system).init(
-      SingletonActor(Behaviors.empty, "WorldManager").withStopMessage(WorldProtocol.Stop)
+      SingletonActor(WorldManagerActor(World(800, 600, Seq.empty, Seq.empty)), "WorldManager")
+        .withStopMessage(WorldProtocol.NotifyVictory("dummy", 0))
     )
 
     // Crea il PlayerActor
     val playerName = s"Player-${Random.between(1000, 9999)}"
-    context.spawn(PlayerActor(playerName,Random.nextInt(worldWidth), Random.nextInt(worldHeight), initialPlayerMass, worldManager), playerName)
+    context.spawn(
+      PlayerActor(playerName,Random.nextInt(worldWidth), Random.nextInt(worldHeight), initialPlayerMass, worldManager), 
+      playerName
+    )
 
     Behaviors.receiveMessage {
       case WrappedClusterEvent(event) =>

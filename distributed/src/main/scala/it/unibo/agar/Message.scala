@@ -2,7 +2,7 @@ package it.unibo.agar
 
 import akka.actor.typed.ActorRef
 import it.unibo.agar.PlayerProtocol.CurrentScore
-import it.unibo.agar.model.{Food, Player}
+import it.unibo.agar.model.{Food, Player, World}
 
 /** Tag interface for all messages sends by actors */
 trait Message
@@ -14,6 +14,7 @@ object WorldProtocol:
   case class RemovePlayer(playerId: String) extends WorldMessage
   case class UpdatePlayerScore(playerId: String, newScore: Double) extends WorldMessage
   case class NotifyVictory(playerId: String, score: Double) extends WorldMessage
+  case class RegisterView(playerId: String, viewRef: ActorRef[ViewProtocol.ViewMessage]) extends WorldMessage
   case object Stop extends WorldMessage
  
 
@@ -32,7 +33,7 @@ object PlayerProtocol:
 object ViewProtocol:
   trait ViewMessage extends Message
   case class MoveInput(dx: Double, dy: Double) extends ViewMessage //rileva input mouse
-  case class UpdatedPosition(x:Double, y:Double) extends ViewMessage
+  case class UpdateView(world: World) extends ViewMessage
 
   //case object Tick extends ViewMessage
 

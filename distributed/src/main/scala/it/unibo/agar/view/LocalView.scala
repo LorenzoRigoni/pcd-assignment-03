@@ -11,12 +11,12 @@ import javax.swing.plaf.ViewportUI
 import scala.swing.*
 
 class LocalView(manager: ActorRef[ViewProtocol.ViewMessage], playerId: String, playerActor: ActorRef[PlayerProtocol.PlayerMessage]) extends MainFrame:
-
   private var world: World = World(worldWidth, worldHeight, Seq.empty, Seq.empty)
+
   title = s"Agar.io - Local View ($playerId)"
   preferredSize = new Dimension(400, 400)
 
-  contents = new Panel:
+  private val panel = new Panel:
     listenTo(keys, mouse.moves)
     focusable = true
     requestFocusInWindow()
@@ -28,12 +28,17 @@ class LocalView(manager: ActorRef[ViewProtocol.ViewMessage], playerId: String, p
         .getOrElse((0.0, 0.0))
       AgarViewUtils.drawWorld(g, world, offsetX, offsetY)
 
-
-    reactions += { case e: event.MouseMoved =>
-      val mousePos = e.point
-      val dx = (mousePos.x - size.width / 2) * 0.01
-      val dy = (mousePos.y - size.height / 2) * 0.01
-      playerActor ! Move(dx, dy)
-      repaint()
+    reactions += {
+      case e: event.MouseMoved =>
+        val mousePos = e.point
+        val dx = (mousePos.x - size.width / 2) * 0.01
+        val dy = (mousePos.y - size.height / 2) * 0.01
+        playerActor ! Move(dx, dy)
     }
 
+  contents = panel
+
+  // Metodo chiamato dal ViewActor per aggiornare la vista
+  def updateWorld(newWorld: World): Unit =
+    this.world = newWorld
+    panel.repaint()
