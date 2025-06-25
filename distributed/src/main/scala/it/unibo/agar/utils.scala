@@ -23,15 +23,15 @@ def startup[X](file: String = "base-cluster", port: Int)(root: => Behavior[X]): 
   ActorSystem(root, file, config)
 
 def startupWithRole[X](role: String, port: Int)(root: => Behavior[X]): ActorSystem[X] =
-  val hostname = InetAddress.getLocalHost.getHostAddress
-  
+  //val hostname = InetAddress.getLocalHost.getHostAddress
+  val hostname = "127.0.0.1"
   val config = ConfigFactory
     .parseString(s"""
       akka.remote.artery.canonical.hostname = "$hostname"
       akka.remote.artery.canonical.port=$port
       akka.cluster.roles = [$role]
       """)
-    .withFallback(ConfigFactory.load("base-cluster"))
+    .withFallback(ConfigFactory.load("agario"))
 
   // Create an Akka system
-  ActorSystem(root, "ClusterSystem", config)
+  ActorSystem(root, "agario", config)

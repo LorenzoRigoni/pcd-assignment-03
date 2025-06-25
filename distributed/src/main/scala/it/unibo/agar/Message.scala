@@ -14,6 +14,7 @@ object WorldProtocol:
   case class RemovePlayer(playerId: String) extends WorldMessage
   case class UpdatePlayerScore(playerId: String, newScore: Double) extends WorldMessage
   case class NotifyVictory(playerId: String, score: Double) extends WorldMessage
+  case class RegisterPlayer(playerId: String, playerRef: ActorRef[PlayerProtocol.PlayerMessage]) extends WorldMessage
   case class RegisterView(playerId: String, viewRef: ActorRef[ViewProtocol.ViewMessage]) extends WorldMessage
   case object Stop extends WorldMessage
  

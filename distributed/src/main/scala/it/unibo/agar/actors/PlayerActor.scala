@@ -21,8 +21,7 @@ object PlayerActor:
       val scoreActor = context.spawn(ScoreManagerActor(playerId, initialScore, winScore, worldManager), s"points-$playerId")
       val collisionActor = context.spawn(CollisionManagerActor(playerId, scoreActor, worldManager), s"collisions-$playerId")
       val movementActor = context.spawn(PlayerMovementActor(playerId, initialX, initialY,worldWidth, worldHeight, speed,context.self, worldManager), s"move-$playerId")
-      val viewActor = context.spawn(ViewActor(playerId, context.self, worldManager), s"view-$playerId")
-      worldManager ! WorldProtocol.RegisterView(playerId, viewActor)
+
 
       //smisto i messaggi tra i vari sottoattori
       Behaviors.receiveMessage[PlayerMessage]:

@@ -45,5 +45,11 @@ object Main:
   }
 
   @main def run(): Unit =
-    val config = ConfigFactory.load("agario")
+    //val config = ConfigFactory.load("agario")
+    val config = ConfigFactory
+      .parseString("""
+        akka.remote.artery.canonical.hostname = "127.0.0.1"
+        akka.remote.artery.canonical.port = 25251
+      """)
+      .withFallback(ConfigFactory.load("agario"))
     ActorSystem(Main(), "agario", config)
