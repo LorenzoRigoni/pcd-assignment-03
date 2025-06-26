@@ -1,44 +1,47 @@
 package it.unibo.agar.controller
 
+import akka.actor.typed.ActorSystem
+import akka.actor.typed.scaladsl.Behaviors
 import akka.cluster.typed.{ClusterSingleton, SingletonActor}
+import com.typesafe.config.ConfigFactory
 import it.unibo.agar.actors.{ClusterSupervisorActor, PlayerActor, ViewActor, WorldManagerActor}
 import it.unibo.agar.model.{GameInitializer, World}
-import it.unibo.agar.{WorldProtocol, startupWithRole}
+import it.unibo.agar.{GameConf, WorldProtocol, startupWithRole}
 import it.unibo.agar.GameConf.*
 
 import scala.io.StdIn
 
 object GameClient:
-  def main(args: Array[String]): Unit =
-    val inputPlayerId = if args.nonEmpty then args(0) else {
+  private def getPlayerId(args: Array[String]): String =
+    if args.nonEmpty && args(0).trim.nonEmpty then args(0).trim
+    else {
       println("Enter player ID:")
-      StdIn.readLine()
+      val input = scala.io.StdIn.readLine().trim
+      if input.isEmpty then "Player1" else input
     }
-    
-    val initialWorld = World(800, 600, Seq.empty, GameInitializer.initialFoods(numFood, worldWidth, worldHeight, foodMass))
 
-    // Avvia il sistema come client
-    val system = startupWithRole("client", 0)(ClusterSupervisorActor(initialWorld))
+  def main(args: Array[String]): Unit =
+    val playerId = getPlayerId(args)
 
-    // per ottenere il singleton WorldManager (proxy)
-    val worldManagerProxy = ClusterSingleton(system).init(
-      SingletonActor(WorldManagerActor(initialWorld), "WorldManager")
+    val config = ConfigFactory.load("client")
+    val system = ActorSystem(Behaviors.empty, "agario", config)
+
+    val worldManager = ClusterSingleton(system).init(
+      SingletonActor(WorldManagerActor(World(800, 600, Seq.empty, Seq.empty)), "WorldManager")
     )
 
-    // Crea PlayerActor
-    val playerId = inputPlayerId.replaceAll("\\s+", "_") //per evitare eccezioni date da spazi bianchi...
-    val playerActor = system.systemActorOf(
-      PlayerActor(playerId, 100, 100, 120, worldManagerProxy),
+    val player = system.systemActorOf(
+      PlayerActor(playerId, 100, 100, GameConf.initialPlayerMass, worldManager),
       s"player-$playerId"
     )
-    worldManagerProxy ! WorldProtocol.RegisterPlayer(playerId, playerActor)
 
-    //Crea ViewActor
-    val viewActor = system.systemActorOf(
-      ViewActor(playerId, playerActor, worldManagerProxy),
+    val view = system.systemActorOf(
+      ViewActor(playerId, player, worldManager),
       s"view-$playerId"
     )
-    worldManagerProxy ! WorldProtocol.RegisterView(playerId, viewActor)
+
+    worldManager ! WorldProtocol.RegisterPlayer(playerId, player)
+    worldManager ! WorldProtocol.RegisterView(playerId, view)
 
     println(s"Player $playerId connected. Press ENTER to exit.")
     StdIn.readLine()

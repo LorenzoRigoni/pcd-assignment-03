@@ -1,55 +1,27 @@
-package it.unibo.agar.controller
-import akka.actor.typed.*
-import akka.actor.typed.scaladsl.*
-import akka.cluster.ClusterEvent
-import akka.cluster.typed.*
-import com.typesafe.config.ConfigFactory
-import it.unibo.agar.GameConf.*
-import it.unibo.agar.WorldProtocol
-import it.unibo.agar.actors.{PlayerActor, WorldManagerActor}
-import it.unibo.agar.model.{GameInitializer, World}
-
-import scala.util.Random
+import it.unibo.agar.controller.{GameClient, GameServer}
 
 object Main:
+  def main(args: Array[String]): Unit =
+    if args.isEmpty then
+      println("Starting server and client with default player...")
 
-  sealed trait InternalCommand
-  private final case class WrappedClusterEvent(event: ClusterEvent.MemberEvent) extends InternalCommand
+      // Avvia server in un thread separato
+      val serverThread = new Thread(() => GameServer.main(Array.empty))
+      serverThread.setDaemon(true)
+      serverThread.start()
 
-  def apply(): Behavior[InternalCommand] = Behaviors.setup { context =>
-    val cluster = Cluster(context.system)
+      // Attendi che il server sia pronto (es. 2 secondi)
+      Thread.sleep(2000)
 
-    // Adattatore per eventi cluster
-    val clusterEventAdapter = context.messageAdapter[ClusterEvent.MemberEvent](WrappedClusterEvent)
-    cluster.subscriptions ! Subscribe(clusterEventAdapter, classOf[ClusterEvent.MemberEvent])
-
-    val system = context.system
-
-    val worldManager = ClusterSingleton(system).init(
-      SingletonActor(WorldManagerActor(World(800, 600, Seq.empty, GameInitializer.initialFoods(numFood, worldWidth, worldHeight, foodMass))), "WorldManager")
-        .withStopMessage(WorldProtocol.NotifyVictory("dummy", 0))
-    )
-
-    // Crea il PlayerActor
-    /*val playerName = s"Player-${Random.between(1000, 9999)}"
-    context.spawn(
-      PlayerActor(playerName,Random.nextInt(worldWidth), Random.nextInt(worldHeight), initialPlayerMass, worldManager), 
-      playerName
-    )*/
-
-    Behaviors.receiveMessage {
-      case WrappedClusterEvent(event) =>
-        context.log.info(s"Evento cluster: $event")
-        Behaviors.same
-    }
-  }
-
-  @main def run(): Unit =
-    //val config = ConfigFactory.load("agario")
-    val config = ConfigFactory
-      .parseString("""
-        akka.remote.artery.canonical.hostname = "127.0.0.1"
-        akka.remote.artery.canonical.port = 25251
-      """)
-      .withFallback(ConfigFactory.load("agario"))
-    ActorSystem(Main(), "agario", config)
+      // Avvia client con playerId di default
+      GameClient.main(Array("Player1"))
+    else
+      args(0).toLowerCase match
+        case "server" =>
+          GameServer.main(Array.empty)
+        case "client" =>
+          val playerId = if args.length > 1 then args(1) else "Player1"
+          GameClient.main(Array(playerId))
+        case _ =>
+          println(s"Unknown argument: ${args(0)}")
+          System.exit(1)
