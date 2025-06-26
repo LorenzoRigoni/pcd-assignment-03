@@ -32,12 +32,12 @@ object PlayerActor:
       //smisto i messaggi tra i vari sottoattori
       Behaviors.receiveMessage{
         case Move(x, y) =>
-          context.log.info(s"PlayerActor: received Move($x, $y), forwarding to movementActor")
+          //context.log.info(s"PlayerActor: received Move($x, $y), forwarding to movementActor")
           movementActor ! Move(x, y)
           Behaviors.same
 
         case Tick =>
-          context.log.info("PlayerActor: Tick received, forwarding to movementActor")
+          //context.log.info("PlayerActor: Tick received, forwarding to movementActor")
           movementActor ! Tick
           Behaviors.same
 

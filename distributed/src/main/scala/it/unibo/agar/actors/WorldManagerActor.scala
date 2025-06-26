@@ -1,10 +1,10 @@
 package it.unibo.agar.actors
 
-import akka.actor.typed.scaladsl.Behaviors
+import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
 import akka.actor.typed.{ActorRef, Behavior}
 import it.unibo.agar.GameConf.*
 import it.unibo.agar.WorldProtocol.*
-import it.unibo.agar.model.{EatingManager, World}
+import it.unibo.agar.model.{EatingManager, Player, World}
 import it.unibo.agar.{PlayerProtocol, ViewProtocol}
 
 import scala.concurrent.duration.*
@@ -72,13 +72,18 @@ object WorldManagerActor:
           Behaviors.same
         
         case UpdatePlayerMovement(playerId, x, y) =>
-          world = world.copy(players = world.players.map {
+          /*world = world.copy(players = world.players.map {
             case p if p.id == playerId => p.copy(x = x, y = y)
             case other => other
-          })
+          })*/
+          world.playerById(playerId).foreach: p =>
+            val updatedPlayer = p.copy(x = x, y = y)
+            world = world.updatePlayer(updatedPlayer)
+
           Behaviors.same
 
         case GenerateFood =>
+          context.log.info("Num foods: " + world.foods.size)
           if (world.foods.size < numFood) {
             val newFood = generateRandomFood()
             world = world.copy(foods = world.foods :+ newFood)

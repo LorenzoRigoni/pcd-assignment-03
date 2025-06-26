@@ -2,8 +2,9 @@ package it.unibo.agar.controller
 
 import akka.cluster.typed.{ClusterSingleton, SingletonActor}
 import it.unibo.agar.actors.{ClusterSupervisorActor, PlayerActor, ViewActor, WorldManagerActor}
-import it.unibo.agar.model.World
+import it.unibo.agar.model.{GameInitializer, World}
 import it.unibo.agar.{WorldProtocol, startupWithRole}
+import it.unibo.agar.GameConf.*
 
 import scala.io.StdIn
 
@@ -14,7 +15,7 @@ object GameClient:
       StdIn.readLine()
     }
     
-    val initialWorld = World(800, 600, Seq.empty, Seq.empty)
+    val initialWorld = World(800, 600, Seq.empty, GameInitializer.initialFoods(numFood, worldWidth, worldHeight, foodMass))
 
     // Avvia il sistema come client
     val system = startupWithRole("client", 0)(ClusterSupervisorActor(initialWorld))

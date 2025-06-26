@@ -7,7 +7,7 @@ import com.typesafe.config.ConfigFactory
 import it.unibo.agar.GameConf.*
 import it.unibo.agar.WorldProtocol
 import it.unibo.agar.actors.{PlayerActor, WorldManagerActor}
-import it.unibo.agar.model.World
+import it.unibo.agar.model.{GameInitializer, World}
 
 import scala.util.Random
 
@@ -26,16 +26,16 @@ object Main:
     val system = context.system
 
     val worldManager = ClusterSingleton(system).init(
-      SingletonActor(WorldManagerActor(World(800, 600, Seq.empty, Seq.empty)), "WorldManager")
+      SingletonActor(WorldManagerActor(World(800, 600, Seq.empty, GameInitializer.initialFoods(numFood, worldWidth, worldHeight, foodMass))), "WorldManager")
         .withStopMessage(WorldProtocol.NotifyVictory("dummy", 0))
     )
 
     // Crea il PlayerActor
-    val playerName = s"Player-${Random.between(1000, 9999)}"
+    /*val playerName = s"Player-${Random.between(1000, 9999)}"
     context.spawn(
       PlayerActor(playerName,Random.nextInt(worldWidth), Random.nextInt(worldHeight), initialPlayerMass, worldManager), 
       playerName
-    )
+    )*/
 
     Behaviors.receiveMessage {
       case WrappedClusterEvent(event) =>

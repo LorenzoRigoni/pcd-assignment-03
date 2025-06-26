@@ -25,7 +25,7 @@ object PlayerMovementActor:
       Behaviors.receiveMessage{
         //Cambio di direzione del player 
         case PlayerProtocol.Move(newDx, newDy) =>
-          context.log.info(s"PlayerMovementActor: direction updated to ($newDx, $newDy)")
+          //context.log.info(s"PlayerMovementActor: direction updated to ($newDx, $newDy)")
           direction = (newDx, newDy)
           Behaviors.same
 
@@ -34,7 +34,7 @@ object PlayerMovementActor:
           val (dx, dy) = direction
           x = (x + dx * speed).max(0).min(worldWidth)
           y = (y + dy * speed).max(0).min(worldHeight)
-          context.log.info(s"PlayerMovementActor: position updated to ($x, $y)")
+          //context.log.info(s"PlayerMovementActor: position updated to ($x, $y)")
           worldManager ! UpdatePlayerMovement(playerId, x, y)
           Behaviors.same
 
