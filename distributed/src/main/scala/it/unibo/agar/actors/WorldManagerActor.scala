@@ -109,10 +109,14 @@ object WorldManagerActor:
           Behaviors.same
 
         case UpdatePlayerScore(playerId, newScore) =>
+          world.playerById(playerId).foreach { p =>
+            val updatedPlayer = p.copy(mass = newScore)
+            world = world.updatePlayer(updatedPlayer)
+          }
           Behaviors.same
 
         case NotifyVictory(playerId, score) =>
-          context.log.info(s"Player $playerId wins! Score: $score")
+          context.log.info(s"PLAYER $playerId WON! SCORE: $score")
           Behaviors.stopped
 
         case Stop =>
