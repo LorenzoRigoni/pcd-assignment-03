@@ -17,6 +17,9 @@ object WorldManagerActor:
       var world = initialWorld
       var players: Map[String, ActorRef[PlayerProtocol.PlayerMessage]] = Map.empty //mappa playerID -> ActorRef Player actor
       var views: Map[String, ActorRef[ViewProtocol.ViewMessage]] = Map.empty //mappa playerID -> ActorRef view Actor
+      val globalViewActor = context.spawn(GlobalViewActor(), "global-view")
+      views += ("global" -> globalViewActor)
+
 
       def generateRandomFood(): it.unibo.agar.model.Food = {
         it.unibo.agar.model.Food(
@@ -33,14 +36,14 @@ object WorldManagerActor:
           world.foods.foreach { food =>
             if EatingManager.collides(player, food) then
               players.get(player.id).foreach { playerRef =>
-                playerRef ! PlayerProtocol.FoodCollision(food,player.x, player.y)
+                playerRef ! PlayerProtocol.FoodCollision(food, player.x, player.y)
               }
           }
 
           world.players.filterNot(_.id == player.id).foreach { otherPlayer =>
             if EatingManager.collides(player, otherPlayer) then
               players.get(player.id).foreach { playerRef =>
-                playerRef ! PlayerProtocol.PlayerCollision(otherPlayer,player.x, player.y)
+                playerRef ! PlayerProtocol.PlayerCollision(otherPlayer, player.x, player.y)
               }
           }
         }
@@ -53,7 +56,7 @@ object WorldManagerActor:
       context.system.scheduler.scheduleWithFixedDelay(0.seconds, 1.second) { () =>
         context.self ! GenerateFood
       }
-      
+
       Behaviors.receiveMessage {
         case RegisterPlayer(playerId, playerActorRef) =>
           context.log.info(s"Registering player $playerId")
@@ -70,12 +73,8 @@ object WorldManagerActor:
           context.log.info(s"Registering world for plater $playerId")
           views = views + (playerId -> viewRef)
           Behaviors.same
-        
+
         case UpdatePlayerMovement(playerId, x, y) =>
-          /*world = world.copy(players = world.players.map {
-            case p if p.id == playerId => p.copy(x = x, y = y)
-            case other => other
-          })*/
           world.playerById(playerId).foreach: p =>
             val updatedPlayer = p.copy(x = x, y = y)
             world = world.updatePlayer(updatedPlayer)
@@ -121,6 +120,6 @@ object WorldManagerActor:
 
         case Stop =>
           context.log.info("Stopping WorldManagerActor via stop message")
-          Behaviors.stopped  
+          Behaviors.stopped
       }
     }
