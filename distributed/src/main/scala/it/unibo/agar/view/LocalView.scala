@@ -22,6 +22,7 @@ class LocalView(manager: ActorRef[ViewProtocol.ViewMessage], playerId: String, p
     requestFocusInWindow()
 
     override def paintComponent(g: Graphics2D): Unit =
+      super.paintComponent(g) //dovrebbe cancellare il contenuto prima di fare il repaint
       val playerOpt = world.players.find(_.id == playerId)
       val (offsetX, offsetY) = playerOpt
         .map(p => (p.x - size.width / 2.0, p.y - size.height / 2.0))
