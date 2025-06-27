@@ -1,17 +1,38 @@
 package it.unibo.agar.server;
 
+import it.unibo.agar.common.GameServer;
 import it.unibo.agar.model.*;
+
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.List;
 
 public class ServerMain {
-    public static void main(String[] args) throws Exception {
-        World initialWorld = new World(1000, 700, List.of(), 
-            GameInitializer.initialFoods(100, 1000, 700));
-        GameServer server = new GameServerImpl(initialWorld);
-        Registry registry = LocateRegistry.createRegistry(1099);
-        registry.rebind("GameServer", server);
-        System.out.println("Server ready");
+    public static void main(String[] args) {
+        try {
+            int width = 2000;
+            int height = 2000;
+            List<Player> players = List.of();
+            List<Food> foods = GameInitializer.initialFoods(150, width, height);
+            World world = new World(width, height, players, foods);
+
+            RemoteGameServerImpl gameServer = new RemoteGameServerImpl(world);
+            Registry registry = LocateRegistry.createRegistry(8080);
+            registry.rebind("GameServer", gameServer);
+            System.out.println("Server ready.");
+
+            new Thread(() -> {
+                while (true) {
+                    try {
+                        Thread.sleep(50);
+                        gameServer.tick();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

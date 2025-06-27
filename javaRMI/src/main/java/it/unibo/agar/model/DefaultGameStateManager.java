@@ -30,22 +30,20 @@ public class DefaultGameStateManager implements GameStateManager {
         this.world.getPlayers().forEach(p -> playerDirections.put(p.getId(), Position.ZERO));
     }
 
-    @Override
-    public World getWorld() {
-        return this.world;
-    }
+    public synchronized World getWorld() {
+    return this.world;
+}
 
+    public synchronized void tick() {
+        this.world = handleEating(moveAllPlayers(this.world));
+        cleanupPlayerDirections();
+    }
     @Override
     public void setPlayerDirection(final String playerId, final double dx, final double dy) {
         // Ensure player exists before setting direction
         if (world.getPlayerById(playerId).isPresent()) {
             this.playerDirections.put(playerId, Position.of(dx, dy));
         }
-    }
-
-    public void tick() {
-        this.world = handleEating(moveAllPlayers(this.world));
-        cleanupPlayerDirections();
     }
 
     private World moveAllPlayers(final World currentWorld) {
