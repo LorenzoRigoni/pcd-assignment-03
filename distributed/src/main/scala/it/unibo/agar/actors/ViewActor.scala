@@ -25,5 +25,9 @@ object ViewActor:
         case ViewProtocol.UpdateView(world) =>
           view.updateWorld(world) // aggiorna stato e chiama repaint()
           Behaviors.same
+
+        case ViewProtocol.DisplayVictory(playerId, score) =>
+          view.displayVictory(playerId, score)
+          Behaviors.same
       }
     }

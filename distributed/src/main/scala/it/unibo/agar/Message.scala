@@ -35,6 +35,7 @@ object ViewProtocol:
   trait ViewMessage extends Message
   case class MoveInput(dx: Double, dy: Double) extends ViewMessage //rileva input mouse
   case class UpdateView(world: World) extends ViewMessage
+  case class DisplayVictory(playerId: String, score: Double) extends ViewMessage
 
   //case object Tick extends ViewMessage
 

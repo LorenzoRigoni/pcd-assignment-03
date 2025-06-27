@@ -3,6 +3,7 @@ package it.unibo.agar.actors
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
 import akka.actor.typed.{ActorRef, Behavior}
 import it.unibo.agar.GameConf.*
+import it.unibo.agar.ViewProtocol.DisplayVictory
 import it.unibo.agar.WorldProtocol.*
 import it.unibo.agar.model.{EatingManager, Player, World}
 import it.unibo.agar.{PlayerProtocol, ViewProtocol}
@@ -116,6 +117,9 @@ object WorldManagerActor:
 
         case NotifyVictory(playerId, score) =>
           context.log.info(s"PLAYER $playerId WON! SCORE: $score")
+          views.values.foreach {actor =>
+            actor ! DisplayVictory(playerId, score)
+          }
           Behaviors.stopped
 
         case Stop =>

@@ -7,6 +7,7 @@ import it.unibo.agar.{PlayerProtocol, ViewProtocol}
 import it.unibo.agar.model.{MockGameStateManager, World}
 
 import java.awt.Graphics2D
+import javax.swing.JOptionPane
 import javax.swing.plaf.ViewportUI
 import scala.swing.*
 
@@ -39,7 +40,9 @@ class LocalView(manager: ActorRef[ViewProtocol.ViewMessage], playerId: String, p
 
   contents = panel
 
-  // Metodo chiamato dal ViewActor per aggiornare la vista
   def updateWorld(newWorld: World): Unit =
     this.world = newWorld
     panel.repaint()
+
+  def displayVictory(playerId: String, score: Double): Unit =
+    JOptionPane.showMessageDialog(null, playerId + " wins the game! Score: " + score, "Game over", JOptionPane.INFORMATION_MESSAGE)
