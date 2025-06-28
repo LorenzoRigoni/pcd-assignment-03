@@ -4,10 +4,10 @@ import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import akka.cluster.typed.{ClusterSingleton, SingletonActor}
 import com.typesafe.config.ConfigFactory
-import it.unibo.agar.actors.{ClusterSupervisorActor, PlayerActor, ViewActor, WorldManagerActor}
-import it.unibo.agar.model.{GameInitializer, World}
-import it.unibo.agar.{GameConf, WorldProtocol, startupWithRole}
-import it.unibo.agar.GameConf.*
+import it.unibo.agar.actors.{PlayerActor, ViewActor, WorldManagerActor}
+import it.unibo.agar.model.{World}
+import it.unibo.agar.{GameConf, WorldProtocol}
+
 
 import scala.io.StdIn
 

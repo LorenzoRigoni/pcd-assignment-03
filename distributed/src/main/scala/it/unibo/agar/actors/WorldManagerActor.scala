@@ -79,7 +79,6 @@ object WorldManagerActor:
           world.playerById(playerId).foreach: p =>
             val updatedPlayer = p.copy(x = x, y = y)
             world = world.updatePlayer(updatedPlayer)
-
           Behaviors.same
 
         case GenerateFood =>

@@ -20,7 +20,6 @@ object PlayerMovementActor:
       var x = initialX
       var y = initialY
       var direction: (Double, Double) = (0.0, 0.0)
-      var mass: Double = 120.0
 
       Behaviors.receiveMessage{
         //Cambio di direzione del player 
