@@ -42,4 +42,19 @@ public class RemoteGameStateManagerProxy implements GameStateManager {
     public void tick() {
         // Client doesn't handle ticks
     }
+
+    @Override
+    public boolean isGameOver() {
+        return false;
+    }
+
+    @Override
+    public String getWinnerName() {
+        return "";
+    }
+
+    @Override
+    public double getWinnerScore() {
+        return 0;
+    }
 }

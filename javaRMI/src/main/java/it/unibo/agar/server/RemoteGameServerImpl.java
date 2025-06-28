@@ -32,14 +32,15 @@ public class RemoteGameServerImpl extends UnicastRemoteObject implements GameSer
     @Override
     public synchronized Player joinGame(String playerName) throws RemoteException {
         String id = "p" + System.currentTimeMillis();
-        Player player = new Player(id, 
+        Player player = new Player(id,
+            playerName,
             Math.random() * gameStateManager.getWorld().getWidth(), 
             Math.random() * gameStateManager.getWorld().getHeight(), 
             120.0);
 
         ((DefaultGameStateManager) gameStateManager).addPlayer(player);
         connectedPlayers.add(id);
-        System.out.println("Player joined: " + id);
+        System.out.println("Player joined: " + playerName);
         return player;
     }
 
@@ -63,6 +64,11 @@ public class RemoteGameServerImpl extends UnicastRemoteObject implements GameSer
     @Override
     public synchronized World getWorld() throws RemoteException {
         return gameStateManager.getWorld();
+    }
+
+    @Override
+    public GameStateManager getGameStateManager() throws RemoteException {
+        return this.gameStateManager;
     }
 
     public void tick() {

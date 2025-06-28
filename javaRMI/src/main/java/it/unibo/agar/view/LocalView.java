@@ -15,11 +15,11 @@ public class LocalView extends JFrame {
     private final GameStateManager gameStateManager;
     private final String playerId;
 
-    public LocalView(GameStateManager gameStateManager, String playerId) {
+    public LocalView(GameStateManager gameStateManager, String playerId, String playerName) {
         this.gameStateManager = gameStateManager;
         this.playerId = playerId;
 
-        setTitle("Agar.io - Local View (" + playerId + ") (Java)");
+        setTitle("Agar.io - Local View (" + playerName + ") (Java)");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // Dispose only this window
         setPreferredSize(new Dimension(600, 600));
 
@@ -61,7 +61,12 @@ public class LocalView extends JFrame {
 
     public void repaintView() {
         if (gamePanel != null) {
-            gamePanel.repaint();
+            if (this.gameStateManager.isGameOver())
+                JOptionPane.showMessageDialog(this,
+                        this.gameStateManager.getWinnerName() + " wins! Score: " + this.gameStateManager.getWinnerScore(),
+                        "Game Over", JOptionPane.INFORMATION_MESSAGE);
+            else
+                gamePanel.repaint();
         }
     }
 }

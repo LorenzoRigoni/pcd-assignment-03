@@ -60,7 +60,7 @@ public class AgarViewUtils {
             // Adjust label position to be relative to the player's actual center on screen
             int labelX = positioning.x - PLAYER_LABEL_OFFSET_X;
             int labelY = positioning.y - PLAYER_LABEL_OFFSET_Y;
-            g.drawString(player.getId(), labelX, labelY);
+            g.drawString(player.getName(), labelX, labelY);
         }
     }
 }

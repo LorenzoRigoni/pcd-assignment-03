@@ -32,11 +32,11 @@ public class Main {
             views.add(globalView::repaintView); // Add repaint method reference
             globalView.setVisible(true);
 
-            LocalView localViewP1 = new LocalView(gameManager, "p1");
+            LocalView localViewP1 = new LocalView(gameManager, "p1", "p1");
             views.add(localViewP1::repaintView);
             localViewP1.setVisible(true);
 
-            LocalView localViewP2 = new LocalView(gameManager, "p2");
+            LocalView localViewP2 = new LocalView(gameManager, "p2", "p2");
             views.add(localViewP2::repaintView);
             localViewP2.setVisible(true);
         });
