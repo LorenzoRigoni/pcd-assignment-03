@@ -4,12 +4,13 @@ import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import akka.cluster.typed.{ClusterSingleton, SingletonActor}
 import com.typesafe.config.ConfigFactory
+import it.unibo.agar.GameConf._
 import it.unibo.agar.actors.{PlayerActor, ViewActor, WorldManagerActor}
-import it.unibo.agar.model.{World}
+import it.unibo.agar.model.World
 import it.unibo.agar.{GameConf, WorldProtocol}
 
-
 import scala.io.StdIn
+import scala.util.Random
 
 object GameClient:
   private def getPlayerId(args: Array[String]): String =
@@ -30,19 +31,27 @@ object GameClient:
       SingletonActor(WorldManagerActor(World(800, 600, Seq.empty, Seq.empty)), "WorldManager")
     )
 
-    val player = system.systemActorOf(
-      PlayerActor(playerId, 100, 100, GameConf.initialPlayerMass, worldManager),
-      s"player-$playerId"
-    )
+    // Step 1: Ricevo info iniziali dal server
+    val initReceiver = Behaviors.receiveMessage[WorldProtocol.InitialPlayerInfo] {
+      case WorldProtocol.InitialPlayerInfo(x, y, mass) =>
+        val player = system.systemActorOf(
+          PlayerActor(playerId, x, y, mass, worldManager),
+          s"player-$playerId"
+        )
 
-    val view = system.systemActorOf(
-      ViewActor(playerId, player, worldManager),
-      s"view-$playerId"
-    )
+        val view = system.systemActorOf(
+          ViewActor(playerId, player, worldManager),
+          s"view-$playerId"
+        )
 
-    worldManager ! WorldProtocol.RegisterPlayer(playerId, player)
-    worldManager ! WorldProtocol.RegisterView(playerId, view)
+        // Dopo aver creato gli attori, li registriamo
+        worldManager ! WorldProtocol.RegisterPlayerActor(playerId, player)
+        worldManager ! WorldProtocol.RegisterView(playerId, view)
 
-    println(s"Player $playerId connected. Press ENTER to exit.")
-    StdIn.readLine()
-    system.terminate()
+        Behaviors.stopped
+    }
+    val receiver = system.systemActorOf(initReceiver, s"init-receiver-$playerId")
+
+    // Step 0: Chiedo inizializzazione al WorldManager
+    worldManager ! WorldProtocol.RegisterPlayer(playerId, receiver)
+

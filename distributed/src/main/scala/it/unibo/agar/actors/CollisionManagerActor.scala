@@ -17,6 +17,7 @@ object CollisionManagerActor:
       var pendingPlayer: Option[Player] = None
       var currentPlayerX: Double= 0
       var currentPlayerY: Double = 0
+      var eatenPlayers: Set[String] = Set.empty
 
       Behaviors.receiveMessage {
         case FoodCollision(food, x, y) =>
@@ -27,11 +28,15 @@ object CollisionManagerActor:
           Behaviors.same
 
         case PlayerCollision(otherPlayer, x, y) =>
-          pendingPlayer = Some(otherPlayer)
-          currentPlayerX = x
-          currentPlayerY = y
-          scoreManager ! RequestCurrentMass(context.self)
-          Behaviors.same
+          if eatenPlayers.contains(otherPlayer.id) then
+            context.log.debug(s"Ignoring repeated collision with already eaten player ${otherPlayer.id}")
+            Behaviors.same
+          else
+            pendingPlayer = Some(otherPlayer)
+            currentPlayerX = x
+            currentPlayerY = y
+            scoreManager ! RequestCurrentMass(context.self)
+            Behaviors.same
 
         case CurrentMass(mass) =>
           pendingFood.foreach { food =>
@@ -47,9 +52,9 @@ object CollisionManagerActor:
               context.log.info(s"Player $playerId ate player ${other.id}")
               scoreManager ! CurrentScore(other.mass)
               worldManager ! RemovePlayer(other.id)
+              eatenPlayers += other.id
           }
           pendingPlayer = None
-
           Behaviors.same
 
         case _ => Behaviors.unhandled

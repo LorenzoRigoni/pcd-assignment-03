@@ -59,15 +59,19 @@ object WorldManagerActor:
       }
 
       Behaviors.receiveMessage {
-        case RegisterPlayer(playerId, playerActorRef) =>
+        case RegisterPlayer(playerId, replyTo) =>
           context.log.info(s"Registering player $playerId")
-          val newPlayer = it.unibo.agar.model.Player(
-            id = playerId,
-            x = scala.util.Random.nextDouble() * worldWidth,
-            y = scala.util.Random.nextDouble() * worldHeight,
-            initialPlayerMass)
-          players = players + (playerId -> playerActorRef)
+          val x = scala.util.Random.nextDouble() * worldWidth
+          val y = scala.util.Random.nextDouble() * worldHeight
+          val newPlayer = Player(playerId, x, y, initialPlayerMass)
+
           world = world.copy(players = world.players :+ newPlayer)
+
+          replyTo ! InitialPlayerInfo(x, y, initialPlayerMass)
+          Behaviors.same
+          
+        case RegisterPlayerActor(playerId, actorRef) =>
+          players = players + (playerId -> actorRef)
           Behaviors.same
 
         case RegisterView(playerId, viewRef) =>
