@@ -1,5 +1,6 @@
 package it.unibo.agar.common;
 
+import it.unibo.agar.model.GameStateManager;
 import it.unibo.agar.model.Player;
 import it.unibo.agar.model.World;
 
@@ -11,4 +12,5 @@ public interface GameServer extends Remote {
     void leaveGame(String playerId) throws RemoteException;
     void setDirection(String playerId, double dx, double dy) throws RemoteException;
     World getWorld() throws RemoteException;
+    GameStateManager getGameStateManager() throws RemoteException;
 }

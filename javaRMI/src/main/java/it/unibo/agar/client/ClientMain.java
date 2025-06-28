@@ -13,18 +13,27 @@ public class ClientMain {
 
     public static void main(String[] args) {
         try {
-            Registry registry = LocateRegistry.getRegistry("localhost", 8080);
-            GameServer gameServer = (GameServer) registry.lookup("GameServer");
+            final Registry registry = LocateRegistry.getRegistry("localhost", 8080);
+            final GameServer gameServer = (GameServer) registry.lookup("GameServer");
 
-            Player player = gameServer.joinGame("Player" + (int)(Math.random()*1000));
+            String playerName;
+
+            do {
+                playerName = JOptionPane.showInputDialog(null,
+                        "Enter your name:",
+                        "Player ID",
+                        JOptionPane.QUESTION_MESSAGE);
+            } while(playerName.isEmpty());
+
+            final Player player = gameServer.joinGame(playerName);
             System.out.println("Joined game as: " + player.getId());
 
-            RemoteGameStateManagerProxy gameStateManager = new RemoteGameStateManagerProxy(gameServer, player.getId());
-            LocalView view = new LocalView(gameStateManager, player.getId());
+            final RemoteGameStateManagerProxy gameStateManager = new RemoteGameStateManagerProxy(gameServer, player.getId());
+            final LocalView view = new LocalView(gameStateManager, player.getId(), playerName);
             view.setVisible(true);
 
             // Game loop for continuous updates
-            Timer timer = new Timer(REFRESH_RATE_MS, e -> {
+            final Timer timer = new Timer(REFRESH_RATE_MS, e -> {
                 view.repaintView();
             });
             timer.start();

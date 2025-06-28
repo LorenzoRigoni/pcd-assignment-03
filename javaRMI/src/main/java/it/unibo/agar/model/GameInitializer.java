@@ -13,7 +13,7 @@ public class GameInitializer {
 
     public static List<Player> initialPlayers(final int numPlayers,final int width, final int height, final double initialMass) {
         return IntStream.rangeClosed(1, numPlayers)
-            .mapToObj(i -> new Player("p" + i, random.nextInt(width), random.nextInt(height), initialMass))
+            .mapToObj(i -> new Player("p" + i, "p" + i, random.nextInt(width), random.nextInt(height), initialMass))
             .toList();
     }
 

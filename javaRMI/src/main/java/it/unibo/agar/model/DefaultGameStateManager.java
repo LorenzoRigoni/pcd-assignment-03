@@ -7,8 +7,12 @@ public class DefaultGameStateManager implements GameStateManager {
     private static final double PLAYER_SPEED = 2.0;
     private static final int MAX_FOOD_ITEMS = 150;
     private static final Random random = new Random();
+    private static final double SCORE_TO_WIN = 1000.0;
     private World world;
     private final Map<String, Position> playerDirections;
+    private boolean isGameOver;
+    private String winnerName;
+    private double winnerScore;
 
     public synchronized void addPlayer(Player player) {
         List<Player> newPlayers = new ArrayList<>(world.getPlayers());
@@ -24,10 +28,12 @@ public class DefaultGameStateManager implements GameStateManager {
             .toList();
         this.world = new World(world.getWidth(), world.getHeight(), newPlayers, world.getFoods());
     }
+
     public DefaultGameStateManager(final World initialWorld) {
         this.world = initialWorld;
         this.playerDirections = new HashMap<>();
         this.world.getPlayers().forEach(p -> playerDirections.put(p.getId(), Position.ZERO));
+        this.isGameOver = false;
     }
 
     public synchronized World getWorld() {
@@ -35,9 +41,27 @@ public class DefaultGameStateManager implements GameStateManager {
 }
 
     public synchronized void tick() {
-        this.world = handleEating(moveAllPlayers(this.world));
-        cleanupPlayerDirections();
+        if (!this.isGameOver) {
+            this.world = handleEating(moveAllPlayers(this.world));
+            cleanupPlayerDirections();
+        }
     }
+
+    @Override
+    public boolean isGameOver() {
+        return this.isGameOver;
+    }
+
+    @Override
+    public String getWinnerName() {
+        return this.winnerName;
+    }
+
+    @Override
+    public double getWinnerScore() {
+        return this.winnerScore;
+    }
+
     @Override
     public void setPlayerDirection(final String playerId, final double dx, final double dy) {
         // Ensure player exists before setting direction
@@ -73,6 +97,15 @@ public class DefaultGameStateManager implements GameStateManager {
                 .flatMap(player -> eatenPlayers(currentWorld, player).stream())
                 .distinct()
                 .toList();
+
+        final Set<Player> potentialWinners = updatedPlayers.stream().filter(p -> p.getMass() >= SCORE_TO_WIN)
+                .collect(Collectors.toSet());
+
+        if (!potentialWinners.isEmpty()) {
+            this.isGameOver = true;
+            this.winnerName = potentialWinners.iterator().next().getName();
+            this.winnerScore = potentialWinners.iterator().next().getMass();
+        }
 
         return new World(currentWorld.getWidth(), currentWorld.getHeight(), updatedPlayers, currentWorld.getFoods())
                 .removeFoods(foodsToRemove)
