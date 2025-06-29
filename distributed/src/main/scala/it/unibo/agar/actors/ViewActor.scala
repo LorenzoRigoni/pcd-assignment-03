@@ -29,5 +29,9 @@ object ViewActor:
         case ViewProtocol.DisplayVictory(playerId, score) =>
           view.displayVictory(playerId, score)
           Behaviors.same
+
+        case ViewProtocol.Stop =>
+          context.log.info("Stopping view")
+          Behaviors.stopped
       }
     }

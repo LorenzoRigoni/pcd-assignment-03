@@ -69,7 +69,7 @@ object WorldManagerActor:
 
           replyTo ! InitialPlayerInfo(x, y, initialPlayerMass)
           Behaviors.same
-          
+
         case RegisterPlayerActor(playerId, actorRef) =>
           players = players + (playerId -> actorRef)
           Behaviors.same
@@ -103,12 +103,16 @@ object WorldManagerActor:
           Behaviors.same
 
         case RemovePlayer(playerId) =>
+          context.log.info(s"Removing player $playerId")
+          world = world.removePlayersById(Seq(playerId))
           players.get(playerId).foreach { playerRef =>
-            context.stop(playerRef)
+            playerRef ! PlayerProtocol.StopPlayer
           }
           players = players - playerId
+          /*views.get(playerId).foreach { viewRef =>
+            viewRef ! ViewProtocol.Stop
+          }*/
           views = views - playerId
-          world = world.removePlayersById(Seq(playerId))
           Behaviors.same
 
         case UpdatePlayerScore(playerId, newScore) =>

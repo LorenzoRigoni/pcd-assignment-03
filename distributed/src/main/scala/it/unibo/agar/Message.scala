@@ -31,6 +31,7 @@ object PlayerProtocol:
   case class CurrentScore(score: Double) extends PlayerMessage
   case class RequestCurrentMass(replyTo: ActorRef[CurrentMass]) extends PlayerMessage //interaction with request-response
   case class CurrentMass(mass: Double) extends PlayerMessage
+  case object StopPlayer extends PlayerMessage
 
 
 object ViewProtocol:
@@ -38,6 +39,6 @@ object ViewProtocol:
   case class MoveInput(dx: Double, dy: Double) extends ViewMessage //rileva input mouse
   case class UpdateView(world: World) extends ViewMessage
   case class DisplayVictory(playerId: String, score: Double) extends ViewMessage
+  case object Stop extends ViewMessage
 
-  //case object Tick extends ViewMessage
 

@@ -52,6 +52,10 @@ object PlayerActor:
         case CurrentScore(score) => 
           scoreActor ! CurrentScore(score)
           Behaviors.same
+
+        case StopPlayer =>
+          context.log.info(s"Stopping player $playerId")
+          Behaviors.stopped
       }
 
     }
