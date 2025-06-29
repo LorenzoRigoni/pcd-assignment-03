@@ -10,7 +10,7 @@ import scala.swing.*
 class GlobalView extends MainFrame:
   private var world: World = World(worldWidth, worldHeight, Seq.empty, Seq.empty)
   title = "Agar.io - Global View"
-  preferredSize = new Dimension(800, 800)
+  preferredSize = new Dimension(worldWidth, worldHeight)
 
   private val panel = new Panel:
     override def paintComponent(g: Graphics2D): Unit =
