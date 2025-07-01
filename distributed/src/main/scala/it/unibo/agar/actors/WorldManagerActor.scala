@@ -16,8 +16,8 @@ object WorldManagerActor:
       import context.executionContext
 
       var world = initialWorld
-      var players: Map[String, ActorRef[PlayerProtocol.PlayerMessage]] = Map.empty //mappa playerID -> ActorRef Player actor
-      var views: Map[String, ActorRef[ViewProtocol.ViewMessage]] = Map.empty //mappa playerID -> ActorRef view Actor
+      var players: Map[String, ActorRef[PlayerProtocol.PlayerMessage]] = Map.empty //Map playerID -> ActorRef Player actor
+      var views: Map[String, ActorRef[ViewProtocol.ViewMessage]] = Map.empty //Map playerID -> ActorRef view Actor
       val globalViewActor = context.spawn(GlobalViewActor(), "global-view")
       views += ("global" -> globalViewActor)
 
@@ -31,7 +31,6 @@ object WorldManagerActor:
         )
       }
 
-      //controllo collisioni e aggiornamento view ogni 50 ms
       context.system.scheduler.scheduleWithFixedDelay(0.millis, 50.millis) { () =>
         world.players.foreach { player =>
           world.foods.foreach { food =>
@@ -86,7 +85,6 @@ object WorldManagerActor:
           Behaviors.same
 
         case GenerateFood =>
-          context.log.info("Num foods: " + world.foods.size)
           if (world.foods.size < numFood) {
             val newFood = generateRandomFood()
             world = world.copy(foods = world.foods :+ newFood)
@@ -109,9 +107,6 @@ object WorldManagerActor:
             playerRef ! PlayerProtocol.StopPlayer
           }
           players = players - playerId
-          /*views.get(playerId).foreach { viewRef =>
-            viewRef ! ViewProtocol.Stop
-          }*/
           views = views - playerId
           Behaviors.same
 

@@ -14,7 +14,7 @@ object ViewActor:
     Behaviors.setup { context =>
 
       val view = new LocalView(context.self, playerId, playerActor)
-      view.visible = true // per mostrare la finestra
+      view.visible = true
 
       Behaviors.receiveMessage {
 
@@ -23,7 +23,7 @@ object ViewActor:
           Behaviors.same
 
         case ViewProtocol.UpdateView(world) =>
-          view.updateWorld(world) // aggiorna stato e chiama repaint()
+          view.updateWorld(world)
           Behaviors.same
 
         case ViewProtocol.DisplayVictory(playerId, score) =>
