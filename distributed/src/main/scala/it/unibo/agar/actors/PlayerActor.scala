@@ -19,17 +19,16 @@ object PlayerActor:
       val worldHeight: Int = 1000
       val speed: Double = 10.0
 
-      //creo i tre sottoattori che gestiscono collisioni, punteggio e movimento del player
+      //Create three sub-actors for collision, score and movement
       val scoreActor = context.spawn(ScoreManagerActor(playerId, initialScore, winScore, worldManager), s"points-$playerId")
       val collisionActor = context.spawn(CollisionManagerActor(playerId, scoreActor, worldManager), s"collisions-$playerId")
       val movementActor = context.spawn(PlayerMovementActor(playerId, initialX, initialY,worldWidth, worldHeight, speed,context.self, worldManager), s"move-$playerId")
 
-      // Scheduler per il Tick
+      // Scheduler for Tick
       context.system.scheduler.scheduleAtFixedRate(0.millis, 50.millis) { () =>
         context.self ! Tick
       }
 
-      //smisto i messaggi tra i vari sottoattori
       Behaviors.receiveMessage{
         case Move(x, y) =>
           //context.log.info(s"PlayerActor: received Move($x, $y), forwarding to movementActor")
